@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Droneitor — Aerial photo &amp; video</title>
+<meta name="description" content="Cinematic aerial photo &amp; video for real estate, events and construction. Leave your details and get 10% off your first service." />
+<link rel="icon" type="image/png" href="assets/droneitor-icon.png" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Roboto:wght@300;400;500;700&family=Poppins:wght@400;500;600;700&family=Nunito+Sans:wght@400;500;800;900&display=swap" rel="stylesheet" />
+
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<header class="hdr">
+  <a href="#" class="logo" aria-label="Droneitor">
+    <img src="assets/droneitor-wordmark-light.png" alt="Droneitor — Photography &amp; Video" />
+  </a>
+  <div class="lang" role="group" aria-label="Language / Idioma">
+    <button type="button" class="langPill active" id="langEN" data-lang="en">EN</button>
+    <button type="button" class="langPill" id="langES" data-lang="es">ES</button>
+  </div>
+</header>
+
+<div class="altTrack" aria-hidden="true">
+  <div class="altFill" id="altFill"></div>
+</div>
+<span class="altRead" aria-hidden="true">
+  <span class="altDot"></span><span id="altVal">ALT 394 FT</span>
+</span>
+
+<section class="hero" id="hero">
+  <div class="heroSlides">
+    <div class="heroSlide" data-slide="0">
+      <div class="kb kb1"><img src="assets/slide-1-coastline.webp" data-i18n-alt="heroAlt1" alt="Coastline — aerial top-down shot" /></div>
+    </div>
+    <div class="heroSlide" data-slide="1">
+      <div class="kb kb2"><img src="assets/slide-2-villa.webp" data-i18n-alt="heroAlt2" alt="Real estate — modern villa" /></div>
+    </div>
+    <div class="heroSlide" data-slide="2">
+      <div class="kb kb3"><img src="assets/slide-3-bayside.webp" data-i18n-alt="heroAlt3" alt="Miami Bayside — night skyline" /></div>
+    </div>
+    <div class="heroSlide" data-slide="3">
+      <div class="kb kb4"><img src="assets/slide-4-stadium.webp" data-i18n-alt="heroAlt4" alt="Events — live stadium" /></div>
+    </div>
+    <div class="heroSlide" data-slide="4">
+      <div class="kb kb5"><img src="assets/slide-5-construction.webp" data-i18n-alt="heroAlt5" alt="Construction — site progress" /></div>
+    </div>
+  </div>
+  <div class="heroScrimX" aria-hidden="true"></div>
+  <div class="heroScrimY" aria-hidden="true"></div>
+  <div class="heroGridOverlay" aria-hidden="true"></div>
+
+  <span class="hudTick tl" aria-hidden="true"></span>
+  <span class="hudTick tr" aria-hidden="true"></span>
+  <span class="hudTick bl" aria-hidden="true"></span>
+  <span class="hudTick br" aria-hidden="true"></span>
+
+  <span class="telemetryLine" aria-hidden="true">
+    <span>ALT 394 FT</span>
+    <span class="telLock"><span class="dot"></span>25.7617°N 80.1918°W · LOCKED</span>
+    <span>WIND 8MPH</span>
+    <span>78%</span>
+    <span class="telRec">4K <span class="recDot"></span> REC</span>
+  </span>
+
+  <div class="telemetry" aria-hidden="true">
+    <span>ALT 394 FT</span>
+    <span class="telLock"><span class="dot"></span>25.7617°N 80.1918°W · LOCKED</span>
+    <span>WIND 8MPH</span>
+    <span class="telBat">
+      <svg width="17" height="9" viewBox="0 0 17 9" fill="none"><rect x="0.5" y="0.5" width="13" height="8" rx="1.5" stroke="currentColor"></rect><rect x="2" y="2" width="8" height="5" fill="currentColor"></rect><path d="M15 3v3" stroke="currentColor" stroke-linecap="round"></path></svg>
+      78%
+    </span>
+    <span class="telSig">
+      <span></span><span></span><span></span>
+    </span>
+    <span class="telRec">4K <span class="recDot"></span> REC</span>
+  </div>
+
+  <div class="heroWrap">
+    <div class="heroGrid">
+
+      <div class="heroCopy">
+        <p class="eyebrow heroEyebrow"><span class="rule"></span><span data-i18n="eyebrow">Commercial drone services</span></p>
+        <h1 class="h1"><span data-i18n="h1a">Your project looks better</span> <span class="hl" data-i18n="h1b">from above.</span></h1>
+        <p class="sub" data-i18n="sub">Cinematic aerial photo &amp; video for real estate, events and construction. Leave your details and get 10% off your first service.</p>
+        <div class="trust">
+          <span><span class="dot"></span><span data-i18n="t1">Licensed pilots</span></span>
+          <span><span class="dot"></span><span data-i18n="t2">Fully insured</span></span>
+          <span><span class="dot"></span><span data-i18n="t3">Same-week booking</span></span>
+        </div>
+      </div>
+
+      <div class="formCard" id="formCard">
+        <div class="formBody" id="formBody">
+          <div class="formHead">
+            <h2 class="formH2" data-i18n="formTitle">Get your 10% discount</h2>
+            <span class="badge">10% OFF</span>
+          </div>
+
+          <form id="leadForm" novalidate>
+            <div class="field" id="field-name">
+              <label for="f-name" data-i18n="lblName">Name<span class="req">*</span></label>
+              <input class="inp" id="f-name" name="name" type="text" autocomplete="name" data-i18n-ph="phName" placeholder="Your name" />
+              <p class="msg" data-i18n="errName">Enter your name.</p>
+            </div>
+
+            <div class="field" id="field-email">
+              <label for="f-email" data-i18n="lblEmail">Email<span class="req">*</span></label>
+              <input class="inp" id="f-email" name="email" type="email" autocomplete="email" inputmode="email" data-i18n-ph="phEmail" placeholder="you@example.com" />
+              <p class="msg" data-i18n="errEmail">Enter a valid email.</p>
+            </div>
+
+            <div class="field" id="field-phone">
+              <label for="f-phone" data-i18n="lblPhone">Phone<span class="req">*</span></label>
+              <input class="inp" id="f-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" data-i18n-ph="phPhone" placeholder="Your contact number" />
+              <p class="msg" data-i18n="errPhone">Enter a valid phone number.</p>
+            </div>
+
+            <div class="field" id="field-project">
+              <label for="f-project" data-i18n="lblProject">Project Type<span class="req">*</span></label>
+              <select class="inp" id="f-project" name="project">
+                <option value="" data-i18n="optPlaceholder">Select an option</option>
+                <option value="real-estate" data-i18n="optRealEstate">Real Estate</option>
+                <option value="events" data-i18n="optEvents">Events</option>
+                <option value="construction" data-i18n="optConstruction">Construction</option>
+                <option value="other" data-i18n="optOther">Other</option>
+              </select>
+              <p class="msg" data-i18n="errProject">Choose a project type.</p>
+            </div>
+
+            <div class="captchaRow" id="field-captcha">
+              <label>
+                <input type="checkbox" id="f-captcha" />
+                <span data-i18n="captcha">I'm not a robot</span>
+              </label>
+              <div class="captchaBadge">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00BEE6" stroke-width="1.7" stroke-linecap="round"><path d="M12 3l7 3v6c0 4.2-2.9 7.6-7 9-4.1-1.4-7-4.8-7-9V6z"></path><path d="M9 12.5l2 2 4-4.5"></path></svg>
+                <span>reCAPTCHA</span>
+              </div>
+            </div>
+            <p class="msg captchaMsg" data-i18n="errCaptcha">Please confirm you're not a robot.</p>
+
+            <label class="consentRow">
+              <input type="checkbox" id="f-consent" />
+              <span data-i18n="consent">I agree to the processing of my data and authorize Droneitor to contact me by phone, SMS or email about my discount and service.<span class="req">*</span></span>
+            </label>
+            <p class="msg consentMsg" data-i18n="errConsent">You must accept the privacy notice to continue.</p>
+
+            <button type="submit" class="neonCta ctaSubmit" data-i18n="cta">Get my 10% discount</button>
+
+            <p class="microcopy">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="10" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg>
+              <span><span data-i18n="microcopy">No spam. We only contact you about your discount and service.</span> <span data-i18n="legal">Your data is protected, never sold or shared with third parties and never used for unlawful purposes: it is handled in compliance with current Florida law, including the Florida Information Protection Act (FIPA) and the Florida Telephone Solicitation Act (FTSA).</span></span>
+            </p>
+          </form>
+        </div>
+
+        <div class="formSuccess" id="formSuccess" hidden>
+          <div class="checkCircle">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#00BEE6" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+          </div>
+          <h2 data-i18n="okTitle">You're all set.</h2>
+          <p data-i18n="okBody">We've got your details. We'll email your 10% discount and reach out to schedule your first flight.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="benefits sectionPad">
+  <div class="benefitsInner">
+    <p class="eyebrow"><span class="rule"></span><span data-i18n="benEyebrow">Why Droneitor</span></p>
+    <h2 class="benH2" data-i18n="benHeading">Shots that impress, with the precision of a professional crew.</h2>
+
+    <div class="benGrid">
+      <div class="ben">
+        <span class="benC tl"></span><span class="benC tr"></span><span class="benC bl"></span><span class="benC br"></span>
+        <div class="benIcon">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="13" height="12" rx="2"></rect><path d="M15 10.5l6-3.5v10l-6-3.5z"></path></svg>
+        </div>
+        <span class="benNum">01</span>
+        <h3 data-i18n="b1t">4K/6K cinema tech</h3>
+        <p data-i18n="b1b">Pro drones with cinema-grade stabilization. Every shot sharp, smooth and ready to publish.</p>
+      </div>
+      <div class="ben">
+        <span class="benC tl"></span><span class="benC tr"></span><span class="benC bl"></span><span class="benC br"></span>
+        <div class="benIcon">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="6" height="6" rx="1.5"></rect><path d="M9 9L6 6M15 9l3-3M9 15l-3 3M15 15l3 3"></path><circle cx="4.5" cy="4.5" r="2.5"></circle><circle cx="19.5" cy="4.5" r="2.5"></circle><circle cx="4.5" cy="19.5" r="2.5"></circle><circle cx="19.5" cy="19.5" r="2.5"></circle></svg>
+        </div>
+        <span class="benNum">02</span>
+        <h3 data-i18n="b2t">Impossible angles</h3>
+        <p data-i18n="b2b">Aerial perspectives no ground camera can reach. Show your project at a scale that stops the scroll.</p>
+      </div>
+      <div class="ben">
+        <span class="benC tl"></span><span class="benC tr"></span><span class="benC bl"></span><span class="benC br"></span>
+        <div class="benIcon">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M13 2L4 14h6l-1 8 9-12h-6z"></path></svg>
+        </div>
+        <span class="benNum">03</span>
+        <h3 data-i18n="b3t">Fast turnaround</h3>
+        <p data-i18n="b3b">Book in days, not weeks. Delivered edited and ready to post when you need it.</p>
+      </div>
+      <div class="ben">
+        <span class="benC tl"></span><span class="benC tr"></span><span class="benC bl"></span><span class="benC br"></span>
+        <div class="benIcon">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5l7.5 3v6c0 4.3-3 7.9-7.5 9.5-4.5-1.6-7.5-5.2-7.5-9.5v-6z"></path><path d="M8.75 11.75l2.25 2.25 4.25-4.5"></path></svg>
+        </div>
+        <span class="benNum">04</span>
+        <h3 data-i18n="b4t">Certified precision</h3>
+        <p data-i18n="b4b">Licensed pilots and millimeter flight planning. Consistent, safe results on every job.</p>
+      </div>
+    </div>
+
+    <div class="benCtaRow">
+      <button type="button" class="neonCta" id="scrollToFormBtn" data-i18n="cta">Get my 10% discount</button>
+    </div>
+  </div>
+</section>
+
+<footer class="foot">
+  <div class="footRow">
+    <span>© 2026 DRONEITOR · <a href="https://droneitor.com" target="_blank" rel="noopener">DRONEITOR.COM</a></span>
+    <span class="footTag" data-i18n="footerTag">Professional aerial photo &amp; video</span>
+    <span class="footBy"><span data-i18n="designedBy">Designed by</span> <a href="https://tudigitalmarketing.com" target="_blank" rel="noopener">2DM</a></span>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
