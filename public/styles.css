@@ -16,6 +16,7 @@
   --ink-900: oklch(18% 0.014 240);
   --white: #ffffff;
   --cyan: #00BEE6;
+  --cta-orange: #FF6A2B; /* form-submit CTA only — RGB 255, 106, 43 for the alpha tints below */
 
   --text-hero-sub: oklch(85% 0.008 240);
   --text-trust: oklch(78% 0.01 240);
@@ -338,7 +339,12 @@ select.inp option[value=""] { color: #8C97A3; }
 .neonCta:hover::before { animation: neonShine .6s 0s linear; }
 .neonCta:active { transform: scale(0.95); box-shadow: 0 0 0 0 transparent; transition: all .2s ease-in; }
 .neonCta:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
-.ctaSubmit { width: 100%; margin-top: 10px; }
+.ctaSubmit { width: 100%; margin-top: 10px; border-color: var(--cta-orange); color: var(--cta-orange); }
+.ctaSubmit:hover { background: rgba(255, 106, 43, 0.1); box-shadow: 0 0 40px 10px rgba(255, 106, 43, 0.5); }
+.ctaSubmit::before {
+  background: linear-gradient(90deg, transparent, var(--cta-orange), transparent);
+  box-shadow: 0 0 50px 30px var(--cta-orange);
+}
 
 .microcopy {
   display: flex; align-items: flex-start; gap: 6px; margin: 12px 0 0;
