@@ -120,12 +120,37 @@
     var current = 0;
     slides[0].classList.add("active");
 
+    // Slide 1 (LCP) loads eagerly at full priority. Slides 2-5 sit on the
+    // exact same rect (position:absolute inset:0), so native loading="lazy"
+    // alone won't actually defer their network request — the browser still
+    // sees them "in viewport". We hold their real src/srcset in data-*
+    // attributes and only swap them in after the window's load event, so
+    // they never compete with the LCP image or fonts for bandwidth.
+    function loadSlide(slide) {
+      var img = slide.querySelector("img[data-src]");
+      if (!img) return;
+      if (img.dataset.srcset) { img.srcset = img.dataset.srcset; img.removeAttribute("data-srcset"); }
+      img.src = img.dataset.src;
+      img.removeAttribute("data-src");
+    }
+
+    function loadRemainingSlides() {
+      slides.slice(1).forEach(loadSlide);
+    }
+
+    if (document.readyState === "complete") {
+      loadRemainingSlides();
+    } else {
+      window.addEventListener("load", loadRemainingSlides, { once: true });
+    }
+
     var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduceMotion) return; // se queda en la primera foto, sin animación
 
     setInterval(function () {
       slides[current].classList.remove("active");
       current = (current + 1) % slides.length;
+      loadSlide(slides[current]); // red de seguridad si "load" aún no disparó
       slides[current].classList.add("active");
     }, 6500);
   })();

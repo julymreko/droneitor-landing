@@ -57,10 +57,28 @@ npx wrangler deploy
 Worker configurado en Cloudflare no es `droneitor-landing`, ajusta el
 campo `name` en `wrangler.jsonc` para que coincida.
 
+## Rendimiento — hero LCP
+
+Cada foto del slider tiene 3 tamaños WebP (`-900w`, `-1600w`, sin sufijo
+= ~2880w) servidos vía `srcset`/`sizes="100vw"`. La foto 1 (candidata a
+LCP) carga con `fetchpriority="high"` + `<link rel="preload" imagesrcset>`
+en el `<head>`. Las fotos 2–5 no tienen `src` en el HTML (solo
+`data-src`/`data-srcset`): como las 5 ocupan el mismo rect
+(`position:absolute inset:0`), un `loading="lazy"` nativo no las difiere
+de verdad — el `src` real se asigna por JS recién después de `window.load`,
+para que no compitan por ancho de banda con la imagen del LCP.
+
+Verificado con `chrome-devtools-mcp` (trace + red fría, contexto aislado,
+Slow 4G + CPU×4, servido por HTTP local, no `file://`): LCP ≈ 570&nbsp;ms
+en mobile bajo esas condiciones simuladas — los números absolutos no son
+1:1 con producción (falta el RTT real de la CDN), pero confirman que el
+mecanismo (imagen correcta según viewport + diferido real de las otras 4)
+funciona.
+
 ## Pendiente / no implementado
 
 - Envío real del formulario a un endpoint (hay un `// TODO: fetch(...)`
   en `script.js` — actualmente solo hace `console.log` y muestra el
   estado de éxito).
-- Las 5 fotos del hero sin comprimir pesan ~14.6&nbsp;MB en total; vale la
-  pena recomprimirlas (WebP/AVIF, ~200–400&nbsp;KB c/u) antes de producción.
+- Los `.jpg` originales (sin usar, ~14.6&nbsp;MB) siguen en
+  `public/assets/` sin referenciarse — se pueden borrar cuando quieras.

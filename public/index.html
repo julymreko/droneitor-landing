@@ -11,6 +11,18 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Roboto:wght@300;400;500;700&family=Poppins:wght@400;500;600;700&family=Nunito+Sans:wght@400;500;800;900&display=swap" rel="stylesheet" />
 
+<!-- LCP: preload the exact responsive variant of slide 1 that the browser
+     will actually pick for this viewport (imagesrcset/imagesizes mirror
+     the <img> below), instead of the full 2880w desktop file. -->
+<link
+  rel="preload"
+  as="image"
+  href="assets/slide-1-coastline.webp"
+  imagesrcset="assets/slide-1-coastline-900w.webp 900w, assets/slide-1-coastline-1600w.webp 1600w, assets/slide-1-coastline.webp 2880w"
+  imagesizes="100vw"
+  fetchpriority="high"
+/>
+
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -35,19 +47,63 @@
 <section class="hero" id="hero">
   <div class="heroSlides">
     <div class="heroSlide" data-slide="0">
-      <div class="kb kb1"><img src="assets/slide-1-coastline.webp" data-i18n-alt="heroAlt1" alt="Coastline — aerial top-down shot" /></div>
+      <div class="kb kb1">
+        <img
+          src="assets/slide-1-coastline.webp"
+          srcset="assets/slide-1-coastline-900w.webp 900w, assets/slide-1-coastline-1600w.webp 1600w, assets/slide-1-coastline.webp 2880w"
+          sizes="100vw"
+          fetchpriority="high"
+          data-i18n-alt="heroAlt1" alt="Coastline — aerial top-down shot"
+        />
+      </div>
     </div>
     <div class="heroSlide" data-slide="1">
-      <div class="kb kb2"><img src="assets/slide-2-villa.webp" data-i18n-alt="heroAlt2" alt="Real estate — modern villa" /></div>
+      <div class="kb kb2">
+        <img
+          src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=="
+          data-src="assets/slide-2-villa.webp"
+          data-srcset="assets/slide-2-villa-900w.webp 900w, assets/slide-2-villa-1600w.webp 1600w, assets/slide-2-villa.webp 2880w"
+          sizes="100vw"
+          loading="lazy" fetchpriority="low"
+          data-i18n-alt="heroAlt2" alt="Real estate — modern villa"
+        />
+      </div>
     </div>
     <div class="heroSlide" data-slide="2">
-      <div class="kb kb3"><img src="assets/slide-3-bayside.webp" data-i18n-alt="heroAlt3" alt="Miami Bayside — night skyline" /></div>
+      <div class="kb kb3">
+        <img
+          src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=="
+          data-src="assets/slide-3-bayside.webp"
+          data-srcset="assets/slide-3-bayside-900w.webp 900w, assets/slide-3-bayside-1600w.webp 1600w, assets/slide-3-bayside.webp 2880w"
+          sizes="100vw"
+          loading="lazy" fetchpriority="low"
+          data-i18n-alt="heroAlt3" alt="Miami Bayside — night skyline"
+        />
+      </div>
     </div>
     <div class="heroSlide" data-slide="3">
-      <div class="kb kb4"><img src="assets/slide-4-stadium.webp" data-i18n-alt="heroAlt4" alt="Events — live stadium" /></div>
+      <div class="kb kb4">
+        <img
+          src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=="
+          data-src="assets/slide-4-stadium.webp"
+          data-srcset="assets/slide-4-stadium-900w.webp 900w, assets/slide-4-stadium-1600w.webp 1600w, assets/slide-4-stadium.webp 2880w"
+          sizes="100vw"
+          loading="lazy" fetchpriority="low"
+          data-i18n-alt="heroAlt4" alt="Events — live stadium"
+        />
+      </div>
     </div>
     <div class="heroSlide" data-slide="4">
-      <div class="kb kb5"><img src="assets/slide-5-construction.webp" data-i18n-alt="heroAlt5" alt="Construction — site progress" /></div>
+      <div class="kb kb5">
+        <img
+          src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=="
+          data-src="assets/slide-5-construction.webp"
+          data-srcset="assets/slide-5-construction-900w.webp 900w, assets/slide-5-construction-1600w.webp 1600w, assets/slide-5-construction.webp 2880w"
+          sizes="100vw"
+          loading="lazy" fetchpriority="low"
+          data-i18n-alt="heroAlt5" alt="Construction — site progress"
+        />
+      </div>
     </div>
   </div>
   <div class="heroScrimX" aria-hidden="true"></div>
