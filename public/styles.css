@@ -122,6 +122,7 @@ img { max-width: 100%; display: block; }
 .altRead {
   position: fixed; left: 14px; bottom: 26px; z-index: 30; pointer-events: none;
   display: flex; align-items: center; gap: 7px;
+  padding: 4px 8px; border-radius: 999px; background: rgba(4, 6, 9, 0.55);
   font-family: var(--font-label); font-size: 0.6875rem; letter-spacing: 0.16em;
   color: var(--cyan); text-shadow: 0 0 8px rgba(0, 190, 230, 0.45);
 }
@@ -380,25 +381,18 @@ select.inp option[value=""] { color: #8C97A3; }
     transform 260ms cubic-bezier(.4, 0, .2, 1), border-color 200ms linear, box-shadow 240ms linear;
 }
 .ben.in { opacity: 1; filter: blur(0); }
-.ben.in:hover {
-  transform: translateY(-8px);
-  border-color: rgba(0, 190, 230, 0.55) !important;
-  box-shadow: 0 0 0 1px rgba(0, 190, 230, 0.35), 0 22px 52px rgba(0, 190, 230, 0.16), 0 18px 40px rgba(0, 0, 0, 0.5);
-}
 .ben.in:active { transform: translateY(-6px) scale(0.982); transition: transform 120ms cubic-bezier(.4, 0, .2, 1); }
 .ben::after {
   content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0;
   background: linear-gradient(105deg, transparent 38%, rgba(255, 255, 255, 0.09) 48%, rgba(255, 255, 255, 0.16) 52%, transparent 62%);
   background-size: 260% 100%; background-position: 120% 0;
 }
-.ben.in:hover::after { animation: benGlare 800ms cubic-bezier(.4, 0, .2, 1) forwards; }
 
 .benC { position: absolute; width: 14px; height: 14px; pointer-events: none; opacity: .5; transition: opacity 240ms linear, border-color 240ms linear, box-shadow 240ms linear; }
 .benC.tl { top: 10px; left: 10px; border-left: 1.5px solid rgba(0, 190, 230, 0.4); border-top: 1.5px solid rgba(0, 190, 230, 0.4); }
 .benC.tr { top: 10px; right: 10px; border-right: 1.5px solid rgba(0, 190, 230, 0.4); border-top: 1.5px solid rgba(0, 190, 230, 0.4); }
 .benC.bl { bottom: 10px; left: 10px; border-left: 1.5px solid rgba(0, 190, 230, 0.4); border-bottom: 1.5px solid rgba(0, 190, 230, 0.4); }
 .benC.br { bottom: 10px; right: 10px; border-right: 1.5px solid rgba(0, 190, 230, 0.4); border-bottom: 1.5px solid rgba(0, 190, 230, 0.4); }
-.ben.in:hover .benC { opacity: 1; border-color: var(--cyan); box-shadow: 0 0 10px rgba(0, 190, 230, 0.55); }
 
 .benIcon {
   width: 60px; height: 60px; border-radius: 12px; border: 1px solid rgba(0, 190, 230, 0.35);
@@ -406,7 +400,29 @@ select.inp option[value=""] { color: #8C97A3; }
   background: rgba(0, 190, 230, 0.04);
   transition: transform 240ms cubic-bezier(.4, 0, .2, 1), border-color 240ms linear, background-color 240ms linear;
 }
-.ben.in:hover .benIcon { transform: scale(1.14); border-color: rgba(0, 190, 230, 0.8); background: rgba(0, 190, 230, 0.1); }
+
+/* Puntero fino con hover real (mouse/trackpad): efectos disparados por :hover */
+@media (hover: hover) {
+  .ben.in:hover {
+    transform: translateY(-8px);
+    border-color: rgba(0, 190, 230, 0.55) !important;
+    box-shadow: 0 0 0 1px rgba(0, 190, 230, 0.35), 0 22px 52px rgba(0, 190, 230, 0.16), 0 18px 40px rgba(0, 0, 0, 0.5);
+  }
+  .ben.in:hover::after { animation: benGlare 800ms cubic-bezier(.4, 0, .2, 1) forwards; }
+  .ben.in:hover .benC { opacity: 1; border-color: var(--cyan); box-shadow: 0 0 10px rgba(0, 190, 230, 0.55); }
+  .ben.in:hover .benIcon { transform: scale(1.14); border-color: rgba(0, 190, 230, 0.8); background: rgba(0, 190, 230, 0.1); }
+}
+
+/* Pantallas táctiles: no hay hover real — el estado "premium" queda fijo */
+@media (hover: none) {
+  .ben.in {
+    border-color: rgba(0, 190, 230, 0.55);
+    box-shadow: 0 0 0 1px rgba(0, 190, 230, 0.35), 0 22px 52px rgba(0, 190, 230, 0.16), 0 18px 40px rgba(0, 0, 0, 0.5);
+  }
+  .ben.in::after { opacity: .3; background-position: 40% 0; }
+  .ben.in .benC { opacity: 1; border-color: var(--cyan); box-shadow: 0 0 10px rgba(0, 190, 230, 0.55); }
+  .ben.in .benIcon { border-color: rgba(0, 190, 230, 0.8); background: rgba(0, 190, 230, 0.1); }
+}
 
 .benNum {
   display: flex; align-items: center; gap: 7px;
@@ -458,12 +474,32 @@ select.inp option[value=""] { color: #8C97A3; }
   .telemetry { bottom: 66px !important; }
   .h1 { font-size: 3.4rem !important; }
   .benH2 { font-size: 2.1rem !important; }
+
+  /* Piso mínimo de legibilidad en tablet/mobile (~13-14px) */
+  .trust { font-size: 0.875rem !important; }
+  .microcopy { font-size: 0.8125rem !important; }
+  .consentRow span { font-size: 0.8125rem !important; }
 }
 
 @media (max-width: 620px) {
   .hdr { padding: 24px 18px 12px !important; }
-  .heroWrap { padding: 136px 52px 56px 18px !important; }
+  /* Simétrico: el 18/52 heredado del .dc.html no compensaba nada del
+     altimeter (el riel solo llega a x:9px; 18px ya le daba aire de sobra)
+     — solo descentraba el bloque ~17px hacia la izquierda. */
+  .heroWrap { padding: 136px 30px 56px 30px !important; }
   .heroGrid { gap: 46px !important; }
+
+  /* El recorte vertical de las 5 fotos puede caer en zonas más claras que
+     el recorte panorámico de escritorio; el texto ya no tiene una columna
+     angosta a la izquierda que ayude al contraste, así que el scrim sube
+     de intensidad y cubre el ancho completo en vez de solo desvanecer
+     desde la izquierda. */
+  .heroScrimX {
+    background: linear-gradient(180deg, rgba(5, 7, 10, 0.86) 0%, rgba(5, 7, 10, 0.7) 45%, rgba(5, 7, 10, 0.58) 100%) !important;
+  }
+  .heroScrimY {
+    background: linear-gradient(180deg, rgba(5, 7, 10, 0.6) 0%, rgba(5, 7, 10, 0.3) 22%, rgba(5, 7, 10, 0.3) 68%, rgba(5, 7, 10, 0.66) 100%) !important;
+  }
   .heroEyebrow { margin-bottom: 12px !important; }
   .h1 { font-size: 2.4rem !important; }
   .sub { font-size: 1rem !important; }
