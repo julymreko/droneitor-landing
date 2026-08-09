@@ -57,8 +57,34 @@ npm run dev
 
 ## Despliegue (Cloudflare Workers, static assets)
 
+> **Cada push a `main` sale a producción automáticamente.**
+> Cloudflare está conectado al repo y despliega solo: no hay que ejecutar
+> nada a mano. Un push es un despliegue — no hay paso intermedio de
+> revisión, ni entorno de staging. Lo que se mergea a `main` queda sirviendo
+> en `fly.droneitor.com` en un par de minutos.
+
+Como el formulario ya captura leads reales, un push que rompa `src/` o el
+`<form>` deja de capturar leads pagados hasta el siguiente arreglo. Antes de
+pushear a `main`:
+
 ```bash
-npx wrangler deploy
+npm test        # validación y firma del JWT
+npm run dev     # humo manual del formulario contra D1 local
+```
+
+`npm run deploy:emergency` (o `npx wrangler deploy`) sigue funcionando y
+despliega desde el working directory local, saltándose git. **Normalmente no
+es lo que quieres**: deja producción sirviendo código que no está en `main`,
+y el siguiente push lo sobrescribe sin avisar. Está nombrado así justamente
+para que no parezca la vía normal — úsalo sólo para un rollback de
+emergencia, y en ese caso vuelve a dejar `main` en el estado bueno cuanto
+antes.
+
+Ver despliegues y volver atrás:
+
+```bash
+npx wrangler deployments list
+npx wrangler rollback [<version-id>]
 ```
 
 `wrangler.jsonc` apunta `assets.directory` a `./public`. Si el nombre del

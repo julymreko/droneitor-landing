@@ -6,7 +6,7 @@
   "description": "Droneitor — landing de generación de leads (HTML/CSS/JS plano, sin build step) + Worker de captura en Cloudflare Workers/D1.",
   "scripts": {
     "dev": "wrangler dev",
-    "deploy": "wrangler deploy",
+    "deploy:emergency": "wrangler deploy",
     "test": "vitest run",
     "test:watch": "vitest",
     "migrate:local": "wrangler d1 migrations apply droneitor-leads --local",
