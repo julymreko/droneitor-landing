@@ -14,8 +14,9 @@
     {
       "binding": "DB",
       "database_name": "droneitor-leads",
-      // Sustituir por el id que devuelve `wrangler d1 create droneitor-leads`.
-      "database_id": "REEMPLAZAR_CON_EL_DATABASE_ID"
+      // Creada con --location enam: el INSERT se espera antes de responder al
+      // visitante, y el público de la landing está en Florida.
+      "database_id": "912da2e8-f8b1-49c4-8328-1c676e125cef"
     }
   ],
 
