@@ -133,20 +133,25 @@ Además de los datos del formulario:
 
 ### Puesta en marcha
 
+Ya hecho (no hace falta repetirlo):
+
+- Base D1 `droneitor-leads` creada **con `--location enam`** y su esquema
+  aplicado en remoto. La región se fija al crear: como el `INSERT` se espera
+  antes de responder al visitante y el público es de Florida, dejarla en
+  WNAM (donde cae por defecto) metía un salto de costa a costa en el tiempo
+  percibido de envío.
+- Widget de Turnstile de producción creado y `TURNSTILE_SECRET_KEY` subido.
+
+Pendiente — necesita la consola de Google Cloud:
+
 ```bash
-# 1. Crear la base y pegar el database_id en wrangler.jsonc
-npx wrangler d1 create droneitor-leads
-
-# 2. Aplicar el esquema
-npm run migrate:local     # local
-npm run migrate:remote    # producción
-
-# 3. Secretos (ninguno vive en el repo)
-npx wrangler secret put TURNSTILE_SECRET_KEY
 npx wrangler secret put GOOGLE_SA_EMAIL
 npx wrangler secret put GOOGLE_SA_PRIVATE_KEY
 npx wrangler secret put GOOGLE_SHEET_ID
 ```
+
+Para desarrollo local, los mismos valores van en `.dev.vars` (ya está en
+`.gitignore`) y el esquema se aplica con `npm run migrate:local`.
 
 Para desarrollo local los secretos van en `.dev.vars` (ya está en
 `.gitignore`). Ojo: **wrangler no recarga `.dev.vars` en caliente** — hay que
@@ -160,12 +165,21 @@ widget se renderiza por JS (`render=explicit`) en vez de con
 `class="cf-turnstile"` porque un widget ya montado no puede cambiar de
 idioma: con el toggle ES/EN hay que destruirlo y recrearlo.
 
-Ahora mismo usa la **clave de prueba pública de Cloudflare**
-(`1x00000000000000000000AA`, siempre aprueba). Para producción:
+El widget de producción ya está creado: **"Droneitor landing"**, modo
+`managed`, dominio `fly.droneitor.com`. Su sitekey está en
+`public/script.js` y su secreto ya está subido como secreto del Worker.
 
-1. `TURNSTILE_SITE_KEY` en `public/script.js` → la clave real del sitio
-   (es pública por diseño, va en el cliente).
-2. `wrangler secret put TURNSTILE_SECRET_KEY` → la clave secreta.
+```bash
+npx wrangler turnstile widget list
+npx wrangler turnstile widget get <sitekey>   # el secreto sólo se ve aquí
+```
+
+Como el sitekey sólo resuelve en `fly.droneitor.com`, para desarrollo local
+hay que cambiar temporalmente `TURNSTILE_SITE_KEY` en `public/script.js` por
+la clave de prueba de Cloudflare `1x00000000000000000000AA` (siempre
+aprueba), con su secreto `1x0000000000000000000000000000000AA` en
+`.dev.vars`. Para probar el camino de rechazo, el secreto
+`2x0000000000000000000000000000000AA` siempre falla.
 
 El token es de un solo uso y caduca a los ~5 min, por eso el cliente llama a
 `turnstile.reset()` después de cualquier envío fallido; sin eso, el reintento

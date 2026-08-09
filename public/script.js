@@ -269,10 +269,15 @@
      ES/EN hay que destruirlo y volver a crearlo.
      ============================================================ */
 
-  // Clave pública de PRUEBA de Cloudflare (siempre aprueba). Sustituir por la
-  // real de fly.droneitor.com — es pública por diseño, va en el HTML.
-  // El secreto correspondiente va en `wrangler secret put TURNSTILE_SECRET_KEY`.
-  var TURNSTILE_SITE_KEY = "1x00000000000000000000AA";
+  // Clave pública del widget "Droneitor landing" (modo managed, dominio
+  // fly.droneitor.com). Es pública por diseño: va en el cliente. El secreto
+  // correspondiente vive en `wrangler secret put TURNSTILE_SECRET_KEY`.
+  //
+  // Este sitekey sólo resuelve en fly.droneitor.com. Para desarrollo local,
+  // sustituir temporalmente por la clave de prueba de Cloudflare
+  // "1x00000000000000000000AA" (siempre aprueba) y usar su secreto
+  // "1x0000000000000000000000000000000AA" en .dev.vars.
+  var TURNSTILE_SITE_KEY = "0x4AAAAAAEK4NCNA7EerQLIs";
 
   var turnstileWidgetId = null;
 
