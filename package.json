@@ -1,13 +1,19 @@
 {
   "name": "droneitor-landing",
   "private": true,
+  "type": "module",
   "version": "1.0.0",
-  "description": "Droneitor — landing de generación de leads (HTML/CSS/JS plano, sin build step).",
+  "description": "Droneitor — landing de generación de leads (HTML/CSS/JS plano, sin build step) + Worker de captura en Cloudflare Workers/D1.",
   "scripts": {
     "dev": "wrangler dev",
-    "deploy": "wrangler deploy"
+    "deploy": "wrangler deploy",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "migrate:local": "wrangler d1 migrations apply droneitor-leads --local",
+    "migrate:remote": "wrangler d1 migrations apply droneitor-leads --remote"
   },
   "devDependencies": {
+    "vitest": "^2.1.0",
     "wrangler": "^4.0.0"
   }
 }

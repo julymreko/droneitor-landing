@@ -17,7 +17,9 @@
       lblPhone: "Teléfono", phPhone: "Tu número de contacto", errPhone: "Escribe un teléfono válido.",
       lblProject: "Tipo de Proyecto", errProject: "Selecciona un tipo de proyecto.",
       optPlaceholder: "Selecciona una opción", optRealEstate: "Bienes Raíces", optEvents: "Eventos", optConstruction: "Construcción", optOther: "Otro",
-      captcha: "No soy un robot", errCaptcha: "Confirma que no eres un robot.",
+      captcha: "No soy un robot", errCaptcha: "Completa la verificación de seguridad.",
+      sending: "Enviando…",
+      errSubmit: "No pudimos enviar tus datos. Revisa tu conexión e inténtalo de nuevo.",
       consent: "Acepto el tratamiento de mis datos y autorizo a Droneitor a contactarme por teléfono, SMS o correo sobre mi descuento y mi servicio.",
       errConsent: "Debes aceptar el aviso de privacidad para continuar.",
       cta: "Quiero mi 10% de descuento",
@@ -51,7 +53,9 @@
       lblPhone: "Phone", phPhone: "Your contact number", errPhone: "Enter a valid phone number.",
       lblProject: "Project Type", errProject: "Choose a project type.",
       optPlaceholder: "Select an option", optRealEstate: "Real Estate", optEvents: "Events", optConstruction: "Construction", optOther: "Other",
-      captcha: "I'm not a robot", errCaptcha: "Please confirm you're not a robot.",
+      captcha: "I'm not a robot", errCaptcha: "Please complete the security check.",
+      sending: "Sending…",
+      errSubmit: "We couldn't send your details. Check your connection and try again.",
       consent: "I agree to the processing of my data and authorize Droneitor to contact me by phone, SMS or email about my discount and service.",
       errConsent: "You must accept the privacy notice to continue.",
       cta: "Get my 10% discount",
@@ -108,6 +112,10 @@
 
     document.getElementById("langEN").classList.toggle("active", lang === "en");
     document.getElementById("langES").classList.toggle("active", lang === "es");
+
+    // El widget de Turnstile ya montado no puede cambiar de idioma:
+    // hay que recrearlo. En el primer setLang() todavía no existe y no hace nada.
+    if (typeof renderTurnstile === "function") renderTurnstile();
   }
 
   document.getElementById("langEN").addEventListener("click", function () { setLang("en"); });
@@ -219,6 +227,93 @@
   });
 
   /* ============================================================
+     Atribución de campaña (UTM)
+
+     Esta landing existe para recibir tráfico de anuncios pagados, así que
+     hay que saber qué anuncio produjo cada lead. Los parámetros se leen al
+     cargar y se guardan en sessionStorage: si el visitante recarga o llega
+     por una URL ya limpia antes de enviar, la atribución no se pierde.
+     ============================================================ */
+  var UTM_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"];
+
+  var utmParams = (function captureUtm() {
+    var STORAGE_KEY = "droneitor.utm";
+    var fromUrl = {};
+    var found = false;
+
+    var qs = new URLSearchParams(window.location.search);
+    UTM_KEYS.forEach(function (key) {
+      var value = qs.get(key);
+      if (value) { fromUrl[key] = value.slice(0, 200); found = true; }
+    });
+
+    // Safari en modo privado puede lanzar al tocar sessionStorage, y perder
+    // la atribución nunca justifica romper el formulario.
+    try {
+      if (found) {
+        sessionStorage.setItem(STORAGE_KEY, JSON.stringify(fromUrl));
+        return fromUrl;
+      }
+      var saved = sessionStorage.getItem(STORAGE_KEY);
+      return saved ? JSON.parse(saved) : {};
+    } catch (err) {
+      return fromUrl;
+    }
+  })();
+
+  /* ============================================================
+     Turnstile
+
+     Se renderiza explícitamente (no con class="cf-turnstile") porque el
+     widget no puede cambiar de idioma después de montado: con el toggle
+     ES/EN hay que destruirlo y volver a crearlo.
+     ============================================================ */
+
+  // Clave pública de PRUEBA de Cloudflare (siempre aprueba). Sustituir por la
+  // real de fly.droneitor.com — es pública por diseño, va en el HTML.
+  // El secreto correspondiente va en `wrangler secret put TURNSTILE_SECRET_KEY`.
+  var TURNSTILE_SITE_KEY = "1x00000000000000000000AA";
+
+  var turnstileWidgetId = null;
+
+  function renderTurnstile() {
+    var container = document.getElementById("turnstileWidget");
+    if (!window.turnstile || !container) return;
+
+    if (turnstileWidgetId !== null) {
+      window.turnstile.remove(turnstileWidgetId);
+      turnstileWidgetId = null;
+    }
+    container.innerHTML = "";
+
+    turnstileWidgetId = window.turnstile.render(container, {
+      sitekey: TURNSTILE_SITE_KEY,
+      theme: "dark",
+      language: state.lang,
+      callback: function () {
+        document.getElementById("field-captcha").classList.remove("invalid");
+        document.querySelector(".captchaMsg").classList.remove("show");
+      }
+    });
+  }
+
+  // La llama el <script> de Turnstile al terminar de cargar (onload=...).
+  window.droneitorTurnstileReady = renderTurnstile;
+
+  function getTurnstileToken() {
+    if (!window.turnstile || turnstileWidgetId === null) return "";
+    return window.turnstile.getResponse(turnstileWidgetId) || "";
+  }
+
+  // Los tokens de Turnstile son de un solo uso y caducan (~5 min): sin este
+  // reset, cualquier reintento tras un fallo daría "timeout-or-duplicate".
+  function resetTurnstile() {
+    if (window.turnstile && turnstileWidgetId !== null) {
+      window.turnstile.reset(turnstileWidgetId);
+    }
+  }
+
+  /* ============================================================
      Formulario de captura de leads
      ============================================================ */
   (function initForm() {
@@ -234,11 +329,12 @@
       phone: document.getElementById("f-phone"),
       project: document.getElementById("f-project")
     };
-    var captcha = document.getElementById("f-captcha");
     var consent = document.getElementById("f-consent");
     var captchaRow = document.getElementById("field-captcha");
     var captchaMsg = document.querySelector(".captchaMsg");
     var consentMsg = document.querySelector(".consentMsg");
+    var submitBtn = form.querySelector(".ctaSubmit");
+    var formError = document.getElementById("formError");
 
     // Estado visual del <select> vacío vs con valor (para el color del texto)
     fields.project.addEventListener("change", function () {
@@ -249,10 +345,6 @@
     Object.keys(fields).forEach(function (key) {
       fields[key].addEventListener("input", function () { clearInvalid(key); });
       fields[key].addEventListener("change", function () { clearInvalid(key); });
-    });
-    captcha.addEventListener("change", function () {
-      captchaRow.classList.remove("invalid");
-      captchaMsg.classList.remove("show");
     });
     consent.addEventListener("change", function () {
       consentMsg.classList.remove("show");
@@ -282,28 +374,42 @@
       if (!/^[+()\-\s\d]{7,}$/.test(phone) || digits < 7) errors.push("phone");
 
       if (project === "") errors.push("project");
-      if (!captcha.checked) errors.push("captcha");
+      if (!getTurnstileToken()) errors.push("captcha");
       if (!consent.checked) errors.push("consent");
 
       return errors;
     }
 
-    form.addEventListener("submit", function (e) {
-      e.preventDefault();
-      var errors = validate();
+    function showErrors(errors) {
+      errors.forEach(function (key) {
+        if (key === "captcha") { captchaRow.classList.add("invalid"); captchaMsg.classList.add("show"); }
+        else if (key === "consent") { consentMsg.classList.add("show"); }
+        else markInvalid(key);
+      });
+      var first = errors[0];
+      var focusEl = fields[first] || (first === "consent" ? consent : null);
+      if (focusEl) focusEl.focus();
+      else captchaRow.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
 
-      if (errors.length) {
-        errors.forEach(function (key) {
-          if (key === "captcha") { captchaRow.classList.add("invalid"); captchaMsg.classList.add("show"); }
-          else if (key === "consent") { consentMsg.classList.add("show"); }
-          else { markInvalid(key); }
-        });
-        var first = errors[0];
-        var focusEl = fields[first] || (first === "captcha" ? captcha : consent);
-        if (focusEl) focusEl.focus();
-        return;
-      }
+    function setSubmitting(on) {
+      submitBtn.disabled = on;
+      submitBtn.textContent = I18N[state.lang][on ? "sending" : "cta"];
+    }
 
+    function showFormError() {
+      formError.textContent = I18N[state.lang].errSubmit;
+      formError.removeAttribute("hidden");
+    }
+
+    function showSuccess() {
+      card.classList.add("done");
+      body.setAttribute("hidden", "");
+      success.removeAttribute("hidden");
+      success.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    function buildPayload() {
       var lead = {
         name: fields.name.value.trim(),
         email: fields.email.value.trim(),
@@ -311,15 +417,64 @@
         project: fields.project.value,
         lang: state.lang,
         consent: true,
-        captcha: "mock-token"
+        turnstileToken: getTurnstileToken()
       };
-      // TODO: fetch("YOUR_ENDPOINT", { method: "POST", body: JSON.stringify(lead) })
-      console.log("Lead captured:", lead);
+      UTM_KEYS.forEach(function (key) {
+        if (utmParams[key]) lead[key] = utmParams[key];
+      });
+      return lead;
+    }
 
-      card.classList.add("done");
-      body.setAttribute("hidden", "");
-      success.removeAttribute("hidden");
-      success.scrollIntoView({ behavior: "smooth", block: "center" });
+    function submitLead() {
+      setSubmitting(true);
+
+      return fetch("/api/lead", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(buildPayload())
+      })
+        .then(function (res) {
+          return res.json()
+            .catch(function () { return {}; })
+            .then(function (data) { return { res: res, data: data }; });
+        })
+        .then(function (out) {
+          // El éxito sólo se muestra si el Worker confirmó que el lead quedó
+          // guardado en D1. Nunca por haber enviado la petición sin más.
+          if (out.res.ok && out.data.ok === true) {
+            showSuccess();
+            return;
+          }
+
+          // El token ya se consumió; sin reset, el reintento fallaría siempre.
+          resetTurnstile();
+
+          if (Array.isArray(out.data.errors) && out.data.errors.length) {
+            showErrors(out.data.errors);
+          } else {
+            showFormError();
+          }
+          setSubmitting(false);
+        })
+        .catch(function (err) {
+          console.error("Envío del lead falló:", err);
+          resetTurnstile();
+          showFormError();
+          setSubmitting(false);
+        });
+    }
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      formError.setAttribute("hidden", "");
+
+      var errors = validate();
+      if (errors.length) {
+        showErrors(errors);
+        return;
+      }
+
+      submitLead();
     });
   })();
 

@@ -1,8 +1,36 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "droneitor-landing",
-  "compatibility_date": "2024-09-23",
+  "main": "src/index.js",
+  "compatibility_date": "2026-08-01",
+
+  // Worker híbrido: Cloudflare sirve primero los ficheros de ./public y sólo
+  // ejecuta src/index.js cuando la ruta no es un asset (o sea, /api/lead).
   "assets": {
     "directory": "./public"
+  },
+
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "droneitor-leads",
+      // Sustituir por el id que devuelve `wrangler d1 create droneitor-leads`.
+      "database_id": "REEMPLAZAR_CON_EL_DATABASE_ID"
+    }
+  ],
+
+  "vars": {
+    // Nombre de la pestaña de la hoja de cálculo donde se añaden los leads.
+    "SHEETS_TAB": "Leads"
+  },
+
+  "observability": {
+    "enabled": true
   }
+
+  // Secretos (NO van aquí — `wrangler secret put <NOMBRE>`):
+  //   TURNSTILE_SECRET_KEY
+  //   GOOGLE_SA_EMAIL
+  //   GOOGLE_SA_PRIVATE_KEY
+  //   GOOGLE_SHEET_ID
 }

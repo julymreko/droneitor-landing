@@ -296,24 +296,24 @@ select.inp option[value=""] { color: #8C97A3; }
 }
 .field.invalid .inp { border-color: var(--danger); }
 .field.invalid .msg { display: block; }
-#field-captcha.invalid { border-color: var(--danger); }
+/* Error a nivel de formulario (fallo de red o del servidor), distinto de los
+   errores por campo: aquí no hay nada que el visitante pueda corregir. */
+.formError {
+  margin: 10px 0 0; padding: 10px 12px; border-radius: var(--radius);
+  border: 1.5px solid var(--danger); background: rgba(255, 90, 70, 0.08);
+  font-family: var(--font-body); font-size: 0.8125rem; line-height: 1.5; color: var(--danger-text);
+}
+.formError[hidden] { display: none; }
 .captchaMsg { margin: -6px 0 10px; }
 .captchaMsg.show { display: block; }
 .consentMsg { margin: 0 0 8px; }
 .consentMsg.show { display: block; }
 
-.captchaRow {
-  margin: 14px 0 12px; padding: 12px 14px; border: 1.5px solid var(--border-subtle); border-radius: var(--radius);
-  background: var(--input-bg); display: flex; align-items: center; justify-content: space-between; gap: 14px;
-  transition: border-color 150ms cubic-bezier(.4, 0, .2, 1);
-}
-.captchaRow label {
-  display: flex; align-items: center; gap: 10px; cursor: pointer;
-  font-family: var(--font-body); font-size: 0.875rem; color: oklch(90% 0.006 240);
-}
-.captchaRow input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--cyan); cursor: pointer; flex: none; }
-.captchaBadge { display: flex; flex-direction: column; align-items: center; gap: 2px; flex: none; opacity: .75; }
-.captchaBadge span { font-family: var(--font-label); font-size: 0.5625rem; letter-spacing: 0.1em; color: var(--text-muted); }
+/* Turnstile trae su propio chrome (tema oscuro), así que aquí sólo se reserva
+   el hueco y se evita que un ancho fijo de 300px desborde en móvil. */
+.turnstileRow { margin: 14px 0 12px; min-height: 65px; }
+.turnstileRow iframe { max-width: 100%; }
+.turnstileRow.invalid { outline: 1.5px solid var(--danger); outline-offset: 4px; border-radius: var(--radius); }
 
 .consentRow {
   display: flex; align-items: flex-start; gap: 10px; cursor: pointer; margin-bottom: 6px;
@@ -341,6 +341,10 @@ select.inp option[value=""] { color: #8C97A3; }
 .neonCta:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .ctaSubmit { width: 100%; margin-top: 10px; border-color: var(--cta-orange); color: var(--cta-orange); }
 .ctaSubmit:hover { background: rgba(255, 106, 43, 0.1); box-shadow: 0 0 40px 10px rgba(255, 106, 43, 0.5); }
+/* Mientras el envío está en vuelo: sin neón, sin hover, sin doble submit. */
+.ctaSubmit[disabled] { opacity: .55; cursor: progress; }
+.ctaSubmit[disabled]:hover { background: transparent; box-shadow: 0 0 0 0 transparent; color: var(--cta-orange); }
+.ctaSubmit[disabled]:hover::before { animation: none; }
 .ctaSubmit::before {
   background: linear-gradient(90deg, transparent, var(--cta-orange), transparent);
   box-shadow: 0 0 50px 30px var(--cta-orange);

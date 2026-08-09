@@ -7,7 +7,7 @@ framework ni build step.
 ## Estructura
 
 ```
-public/
+public/                              (assets estáticos, sin build step)
 ├── index.html
 ├── styles.css
 ├── script.js
@@ -16,6 +16,14 @@ public/
     ├── droneitor-wordmark-light.png  (logo del header)
     ├── droneitor-wordmark-light.svg
     └── slide-1..5-*.jpg              (5 fotos reales del hero slider)
+src/                                 (Worker de captura de leads)
+├── index.js                          entrada: POST /api/lead
+├── validate.js                       validación de servidor (pura)
+├── turnstile.js                      verificación del token de Turnstile
+└── sheets.js                         réplica a Google Sheets (service account)
+migrations/
+└── 0001_create_leads.sql
+test/                                (vitest, sólo dev)
 wrangler.jsonc
 ```
 
@@ -75,10 +83,134 @@ en mobile bajo esas condiciones simuladas — los números absolutos no son
 mecanismo (imagen correcta según viewport + diferido real de las otras 4)
 funciona.
 
+## Backend — captura de leads (Cloudflare Workers + D1)
+
+Nada de PHP ni del VPS que hospeda el sitio principal: el formulario hace
+`POST /api/lead` a un Worker en este mismo repo.
+
+Es un **Worker híbrido**: Cloudflare sirve primero cualquier fichero de
+`public/` y sólo ejecuta `src/index.js` cuando la ruta no es un asset. Por
+eso no hacen falta patrones de ruta, y una visita normal a la landing no
+consume ni una invocación del Worker.
+
+### Flujo de una petición
+
+```
+POST /api/lead
+  ├─ guardas: método, content-type, tamaño máximo (8 KB)
+  ├─ validación de servidor  ── falla → 400 {ok:false, errors:[campo,…]}
+  ├─ verificación de Turnstile ─ falla → 403, y NO se guarda nada
+  ├─ INSERT en D1            ── falla → 500 {ok:false}
+  ├─ 200 {ok:true}  ← el cliente sólo muestra éxito con esta respuesta
+  └─ ctx.waitUntil( append a Google Sheets → synced_to_sheets = 1 )
+```
+
+**D1 es la fuente de verdad y Sheets una copia best-effort.** Una vez que la
+fila está en D1 el lead está a salvo, así que se responde éxito aunque Google
+falle: una caída de Sheets no puede mostrarle un error a alguien que llegó
+por un anuncio pagado. Lo que no se sincronizó queda con
+`synced_to_sheets = 0` para poder rellenarlo después:
+
+```sql
+SELECT * FROM leads WHERE synced_to_sheets = 0 ORDER BY created_at;
+```
+
+### Qué se guarda y por qué
+
+Además de los datos del formulario:
+
+- **`consent` + `created_at` + `ip`** — es el registro de consentimiento que
+  respalda el aviso de FIPA/FTSA del propio formulario. El servidor rechaza
+  el envío si `consent` no llega como booleano `true`.
+- **`utm_*`** — esta landing recibe tráfico de anuncios pagados; sin esto no
+  hay forma de saber qué campaña produjo qué lead. Se leen del query string
+  al cargar y se guardan en `sessionStorage`, para no perder la atribución
+  si el visitante recarga o llega por una URL ya limpia antes de enviar.
+- **`country` / `region` / `city`** — vienen de `request.cf`, que Cloudflare
+  ya adjunta a la request en el edge. Sin lookup externo ni coste.
+- **`user_agent` crudo** — a propósito sin parsear: navegador y dispositivo
+  se pueden derivar del string después si alguna vez hacen falta.
+
+### Puesta en marcha
+
+```bash
+# 1. Crear la base y pegar el database_id en wrangler.jsonc
+npx wrangler d1 create droneitor-leads
+
+# 2. Aplicar el esquema
+npm run migrate:local     # local
+npm run migrate:remote    # producción
+
+# 3. Secretos (ninguno vive en el repo)
+npx wrangler secret put TURNSTILE_SECRET_KEY
+npx wrangler secret put GOOGLE_SA_EMAIL
+npx wrangler secret put GOOGLE_SA_PRIVATE_KEY
+npx wrangler secret put GOOGLE_SHEET_ID
+```
+
+Para desarrollo local los secretos van en `.dev.vars` (ya está en
+`.gitignore`). Ojo: **wrangler no recarga `.dev.vars` en caliente** — hay que
+reiniciar `npm run dev` tras cambiarlo, o seguirá usando el valor anterior
+sin avisar.
+
+### Turnstile
+
+Sustituye el checkbox falso y la insignia de "reCAPTCHA" que había antes. El
+widget se renderiza por JS (`render=explicit`) en vez de con
+`class="cf-turnstile"` porque un widget ya montado no puede cambiar de
+idioma: con el toggle ES/EN hay que destruirlo y recrearlo.
+
+Ahora mismo usa la **clave de prueba pública de Cloudflare**
+(`1x00000000000000000000AA`, siempre aprueba). Para producción:
+
+1. `TURNSTILE_SITE_KEY` en `public/script.js` → la clave real del sitio
+   (es pública por diseño, va en el cliente).
+2. `wrangler secret put TURNSTILE_SECRET_KEY` → la clave secreta.
+
+El token es de un solo uso y caduca a los ~5 min, por eso el cliente llama a
+`turnstile.reset()` después de cualquier envío fallido; sin eso, el reintento
+fallaría siempre con `timeout-or-duplicate`.
+
+El `<script>` de Turnstile se carga sin `integrity`: Cloudflare publica
+`api.js` sin versionar y lo actualiza sin avisar, así que fijar un hash SRI
+rompería el widget —  y con él, todos los envíos— en cuanto lo cambien.
+
+### Google Sheets
+
+Service account con JWT firmado en RS256 vía Web Crypto (nativo en Workers,
+sin dependencias ni `nodejs_compat`). Alta una sola vez:
+
+1. Habilitar la Google Sheets API en un proyecto de Google Cloud.
+2. Crear una service account y descargar su clave JSON.
+3. **Compartir la hoja** con el email `…iam.gserviceaccount.com` de esa
+   cuenta, con permiso de edición. Sin este paso el append da 403.
+4. Crear en la hoja una pestaña `Leads` con una fila de encabezados en este
+   orden (el mismo de `SHEET_COLUMNS` en `src/sheets.js`):
+
+```
+created_at · name · email · phone · project_type · lang ·
+utm_source · utm_medium · utm_campaign · utm_content · utm_term ·
+country · region · city · ip · user_agent · id
+```
+
+Se escribe con `valueInputOption=RAW`, así que Sheets no evalúa fórmulas; aun
+así los valores que empiezan por `= + - @` se escapan con `'`, porque estas
+hojas se exportan a CSV y Excel **sí** las ejecuta al abrirlas.
+
+## Tests
+
+```bash
+npm test
+```
+
+Cobertura deliberadamente estrecha: `src/validate.js` y la firma del JWT de
+`src/sheets.js`. Son las piezas donde un fallo silencioso pierde leads
+pagados sin que nadie se entere — el resto se verifica a mano contra
+`wrangler dev`. No pretende ser una suite completa que mantener.
+
 ## Pendiente / no implementado
 
-- Envío real del formulario a un endpoint (hay un `// TODO: fetch(...)`
-  en `script.js` — actualmente solo hace `console.log` y muestra el
-  estado de éxito).
 - Los `.jpg` originales (sin usar, ~14.6&nbsp;MB) siguen en
   `public/assets/` sin referenciarse — se pueden borrar cuando quieras.
+- No hay backfill automático de las filas con `synced_to_sheets = 0`; por
+  ahora se consultan a mano con el SELECT de más arriba.

@@ -189,17 +189,12 @@
               <p class="msg" data-i18n="errProject">Choose a project type.</p>
             </div>
 
-            <div class="captchaRow" id="field-captcha">
-              <label>
-                <input type="checkbox" id="f-captcha" />
-                <span data-i18n="captcha">I'm not a robot</span>
-              </label>
-              <div class="captchaBadge">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00BEE6" stroke-width="1.7" stroke-linecap="round"><path d="M12 3l7 3v6c0 4.2-2.9 7.6-7 9-4.1-1.4-7-4.8-7-9V6z"></path><path d="M9 12.5l2 2 4-4.5"></path></svg>
-                <span>reCAPTCHA</span>
-              </div>
+            <!-- Turnstile se renderiza aquí por JS (render=explicit) para poder
+                 recrearlo en el idioma correcto al usar el toggle EN/ES. -->
+            <div class="turnstileRow" id="field-captcha">
+              <div id="turnstileWidget"></div>
             </div>
-            <p class="msg captchaMsg" data-i18n="errCaptcha">Please confirm you're not a robot.</p>
+            <p class="msg captchaMsg" data-i18n="errCaptcha">Please complete the verification.</p>
 
             <label class="consentRow">
               <input type="checkbox" id="f-consent" />
@@ -208,6 +203,8 @@
             <p class="msg consentMsg" data-i18n="errConsent">You must accept the privacy notice to continue.</p>
 
             <button type="submit" class="neonCta ctaSubmit" data-i18n="cta">Get my 10% discount</button>
+
+            <p class="formError" id="formError" role="alert" hidden data-i18n="errSubmit">Something went wrong. Please try again.</p>
 
             <p class="microcopy">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="10" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg>
@@ -288,5 +285,6 @@
 </footer>
 
 <script src="script.js"></script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=droneitorTurnstileReady" async defer></script>
 </body>
 </html>
