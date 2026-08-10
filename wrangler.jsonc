@@ -22,7 +22,12 @@
 
   "vars": {
     // Nombre de la pestaña de la hoja de cálculo donde se añaden los leads.
-    "SHEETS_TAB": "Leads"
+    "SHEETS_TAB": "Leads",
+
+    // Remitente del correo de bienvenida. El dominio tiene que estar
+    // verificado en la cuenta de Zeptomail o el envío falla.
+    "ZEPTOMAIL_FROM_EMAIL": "no-reply@droneitor.com",
+    "ZEPTOMAIL_FROM_NAME": "Droneitor"
   },
 
   "observability": {
@@ -34,4 +39,5 @@
   //   GOOGLE_SA_EMAIL
   //   GOOGLE_SA_PRIVATE_KEY
   //   GOOGLE_SHEET_ID
+  //   ZEPTOMAIL_API_KEY
 }

@@ -176,6 +176,14 @@ npx wrangler secret put GOOGLE_SA_PRIVATE_KEY
 npx wrangler secret put GOOGLE_SHEET_ID
 ```
 
+Pendiente — necesita la consola de Zeptomail (correo de bienvenida). El
+dominio del remitente (`ZEPTOMAIL_FROM_EMAIL` en `wrangler.jsonc`) tiene que
+estar verificado en la cuenta o el envío falla:
+
+```bash
+npx wrangler secret put ZEPTOMAIL_API_KEY
+```
+
 Para desarrollo local, los mismos valores van en `.dev.vars` (ya está en
 `.gitignore`) y el esquema se aplica con `npm run migrate:local`.
 

@@ -10,6 +10,7 @@
 import { validateLead } from "./validate.js";
 import { verifyTurnstile } from "./turnstile.js";
 import { appendLead } from "./sheets.js";
+import { sendWelcomeEmail } from "./zeptomail.js";
 
 const MAX_BODY_BYTES = 8 * 1024;
 
@@ -121,10 +122,16 @@ async function handleLead(request, env, ctx) {
     return json(500, { ok: false, error: "storage_failed" });
   }
 
-  // A partir de aquí el lead ya está a salvo. La réplica a Sheets es
-  // best-effort y va después de responder: una caída de Google no puede
-  // mostrarle un error a alguien que llegó por un anuncio pagado.
-  ctx.waitUntil(syncToSheets(env, { ...row, id: leadId }));
+  // A partir de aquí el lead ya está a salvo. La réplica a Sheets y el
+  // correo de bienvenida son best-effort e independientes entre sí: van
+  // después de responder, y ninguno espera al otro. Una caída de Google no
+  // puede mostrarle un error a alguien que llegó por un anuncio pagado, y una
+  // caída de Zeptomail tampoco puede costarle el correo a un lead que sí se
+  // guardó — encadenar el correo detrás de Sheets reintroduciría exactamente
+  // ese fallo silencioso.
+  const leadWithId = { ...row, id: leadId };
+  ctx.waitUntil(syncToSheets(env, leadWithId));
+  ctx.waitUntil(sendWelcomeEmailSafely(env, leadWithId));
 
   return json(200, { ok: true });
 }
@@ -138,5 +145,19 @@ async function syncToSheets(env, lead) {
   } catch (err) {
     // Queda en la tabla con synced_to_sheets = 0 para poder rellenarlo luego.
     console.error(`Réplica a Sheets falló para el lead ${lead.id}:`, err);
+  }
+}
+
+async function sendWelcomeEmailSafely(env, lead) {
+  try {
+    await sendWelcomeEmail(env, lead);
+    await env.DB.prepare("UPDATE leads SET email_sent = 1 WHERE id = ?")
+      .bind(lead.id)
+      .run();
+  } catch (err) {
+    // Igual que Sheets: el lead ya está a salvo en D1, así que esto nunca
+    // llega al visitante. Queda email_sent = 0 para poder ver y reintentar
+    // los envíos fallidos sin tener que rastrear logs de Workers.
+    console.error(`Correo de bienvenida falló para el lead ${lead.id}:`, err);
   }
 }
