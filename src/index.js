@@ -144,7 +144,7 @@ async function syncToSheets(env, lead) {
       .run();
   } catch (err) {
     // Queda en la tabla con synced_to_sheets = 0 para poder rellenarlo luego.
-    console.error(`Réplica a Sheets falló para el lead ${lead.id}: ${err.message}`);
+    console.error(`Réplica a Sheets falló para el lead ${lead.id}: ${err.stack || err.message}`);
   }
 }
 
@@ -158,6 +158,6 @@ async function sendWelcomeEmailSafely(env, lead) {
     // Igual que Sheets: el lead ya está a salvo en D1, así que esto nunca
     // llega al visitante. Queda email_sent = 0 para poder ver y reintentar
     // los envíos fallidos sin tener que rastrear logs de Workers.
-    console.error(`Correo de bienvenida falló para el lead ${lead.id}: ${err.message}`);
+    console.error(`Correo de bienvenida falló para el lead ${lead.id}: ${err.stack || err.message}`);
   }
 }
