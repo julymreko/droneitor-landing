@@ -25,8 +25,21 @@ const PHONE_MAX = 32;
 const TOKEN_MAX = 2048;
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// Letra Unicode al inicio (bloquea "www.x.com", "=cmd", "+1", etc. de arrancar
+// el string) y de ahí letras/marcas/espacio/guion/apóstrofo (recto o
+// tipográfico) — cubre nombres internacionales reales sin permitir nada que
+// un cliente de correo pueda interpretar como enlace o dirección.
+const NAME_RE = /^\p{L}[\p{L}\p{M} '’-]*$/u;
+// La regex de arriba ya hace inconstruible cualquier URL/dominio real, porque
+// saca el punto, los dos puntos, la barra y la arroba — sin esos caracteres
+// no hay ".com", ".xyz", "http://" ni nada que un cliente de correo pueda
+// enlazar, sea cual sea la extensión o el esquema, incluidos los que a nadie
+// se le ocurrió nombrar. Lo único que la regex sola deja pasar es la palabra
+// pelada sin puntuación ("www", "http") — inofensiva porque no arma un link,
+// pero se bloquea igual acá para no depender de esa distinción.
+const NAME_DENY_EXACT = new Set(["www", "http", "https", "ftp", "ftps"]);
 const PHONE_RE = /^[+()\-\s\d]+$/;
-const PHONE_MIN_DIGITS = 7;
+const PHONE_DIGITS = 10; // EE. UU. exclusivamente — sin código de país.
 
 const str = (v) => (typeof v === "string" ? v.trim() : "");
 
@@ -54,14 +67,21 @@ export function validateLead(raw) {
   const errors = [];
 
   const name = str(raw.name);
-  if (name.length < NAME_MIN || name.length > NAME_MAX) errors.push("name");
+  if (
+    name.length < NAME_MIN ||
+    name.length > NAME_MAX ||
+    !NAME_RE.test(name) ||
+    NAME_DENY_EXACT.has(name.toLowerCase())
+  ) {
+    errors.push("name");
+  }
 
   const email = str(raw.email).toLowerCase();
   if (!email || email.length > EMAIL_MAX || !EMAIL_RE.test(email)) errors.push("email");
 
   const phone = str(raw.phone);
   const digits = (phone.match(/\d/g) || []).length;
-  if (!phone || phone.length > PHONE_MAX || !PHONE_RE.test(phone) || digits < PHONE_MIN_DIGITS) {
+  if (!phone || phone.length > PHONE_MAX || !PHONE_RE.test(phone) || digits !== PHONE_DIGITS) {
     errors.push("phone");
   }
 

@@ -162,7 +162,7 @@
             <div class="field" id="field-name">
               <label for="f-name" data-i18n="lblName">Name<span class="req">*</span></label>
               <input class="inp" id="f-name" name="name" type="text" autocomplete="name" data-i18n-ph="phName" placeholder="Your name" />
-              <p class="msg" data-i18n="errName">Enter your name.</p>
+              <p class="msg" data-i18n="errName">Enter your name (letters, spaces, hyphens, and apostrophes only).</p>
             </div>
 
             <div class="field" id="field-email">
@@ -173,7 +173,7 @@
 
             <div class="field" id="field-phone">
               <label for="f-phone" data-i18n="lblPhone">Phone<span class="req">*</span></label>
-              <input class="inp" id="f-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" data-i18n-ph="phPhone" placeholder="Your contact number" />
+              <input class="inp" id="f-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" maxlength="12" data-i18n-ph="phPhone" placeholder="10-digit, U.S. only, for example 999-999-9999" />
               <p class="msg" data-i18n="errPhone">Enter a valid phone number.</p>
             </div>
 

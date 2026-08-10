@@ -12,9 +12,9 @@
       sub: "Fotografía y video aéreo cinematográfico para bienes raíces, eventos y construcción. Déjanos tus datos y obtén un 10% de descuento en tu primer servicio.",
       t1: "Pilotos certificados", t2: "Servicio asegurado", t3: "Agenda en la semana",
       formTitle: "Obtén tu 10% de descuento",
-      lblName: "Nombre", phName: "Tu nombre", errName: "Escribe tu nombre.",
+      lblName: "Nombre", phName: "Tu nombre", errName: "Escribe tu nombre (solo letras, espacios, guiones y apóstrofes).",
       lblEmail: "Correo", phEmail: "tucorreo@ejemplo.com", errEmail: "Escribe un correo válido.",
-      lblPhone: "Teléfono", phPhone: "Tu número de contacto", errPhone: "Escribe un teléfono válido.",
+      lblPhone: "Teléfono", phPhone: "10 dígitos, solo EE. UU., por ejemplo 999-999-9999", errPhone: "Escribe un teléfono válido.",
       lblProject: "Tipo de Proyecto", errProject: "Selecciona un tipo de proyecto.",
       optPlaceholder: "Selecciona una opción", optRealEstate: "Bienes Raíces", optEvents: "Eventos", optConstruction: "Construcción", optOther: "Otro",
       captcha: "No soy un robot", errCaptcha: "Completa la verificación de seguridad.",
@@ -48,9 +48,9 @@
       sub: "Cinematic aerial photo & video for real estate, events and construction. Leave your details and get 10% off your first service.",
       t1: "Licensed pilots", t2: "Fully insured", t3: "Same-week booking",
       formTitle: "Get your 10% discount",
-      lblName: "Name", phName: "Your name", errName: "Enter your name.",
+      lblName: "Name", phName: "Your name", errName: "Enter your name (letters, spaces, hyphens, and apostrophes only).",
       lblEmail: "Email", phEmail: "you@example.com", errEmail: "Enter a valid email.",
-      lblPhone: "Phone", phPhone: "Your contact number", errPhone: "Enter a valid phone number.",
+      lblPhone: "Phone", phPhone: "10-digit, U.S. only, for example 999-999-9999", errPhone: "Enter a valid phone number.",
       lblProject: "Project Type", errProject: "Choose a project type.",
       optPlaceholder: "Select an option", optRealEstate: "Real Estate", optEvents: "Events", optConstruction: "Construction", optOther: "Other",
       captcha: "I'm not a robot", errCaptcha: "Please complete the security check.",
@@ -355,6 +355,23 @@
       consentMsg.classList.remove("show");
     });
 
+    // Máscara de teléfono a mano (sin Inputmask.js ni ninguna dependencia,
+    // a propósito): sólo dígitos, tope de 10, formateados como ___-___-____.
+    // Reescribe el value completo en cada input, así que el cursor se va al
+    // final tras cada tecla — aceptable para un campo de 10 dígitos EE. UU.,
+    // no vale la pena la complejidad de preservar la posición del cursor.
+    fields.phone.addEventListener("input", function () {
+      var digits = fields.phone.value.replace(/\D/g, "");
+      // Pegar "+1 305 555 0134" es común; sin esto el 1 de país se cuela
+      // como si fuera el primer dígito del área.
+      if (digits.length > 10 && digits[0] === "1") digits = digits.slice(1);
+      digits = digits.slice(0, 10);
+      var out = digits;
+      if (digits.length > 6) out = digits.slice(0, 3) + "-" + digits.slice(3, 6) + "-" + digits.slice(6);
+      else if (digits.length > 3) out = digits.slice(0, 3) + "-" + digits.slice(3);
+      fields.phone.value = out;
+    });
+
     function clearInvalid(key) {
       var wrap = document.getElementById("field-" + key);
       if (wrap) wrap.classList.remove("invalid");
@@ -372,11 +389,12 @@
       var phone = fields.phone.value.trim();
       var project = fields.project.value;
 
-      if (name.length < 2) errors.push("name");
+      var nameDeny = ["www", "http", "https", "ftp", "ftps"];
+      if (name.length < 2 || !/^\p{L}[\p{L}\p{M} '’-]*$/u.test(name) || nameDeny.indexOf(name.toLowerCase()) !== -1) errors.push("name");
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.push("email");
 
       var digits = (phone.match(/\d/g) || []).length;
-      if (!/^[+()\-\s\d]{7,}$/.test(phone) || digits < 7) errors.push("phone");
+      if (digits !== 10) errors.push("phone");
 
       if (project === "") errors.push("project");
       if (!getTurnstileToken()) errors.push("captcha");

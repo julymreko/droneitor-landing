@@ -6,7 +6,7 @@ function body(overrides = {}) {
   return {
     name: "Ana Ruiz",
     email: "ana@example.com",
-    phone: "+1 305 555 0134",
+    phone: "305-555-0134",
     project: "real-estate",
     lang: "en",
     consent: true,
@@ -22,7 +22,7 @@ describe("validateLead — cuerpo bien formado", () => {
     expect(r.value).toMatchObject({
       name: "Ana Ruiz",
       email: "ana@example.com",
-      phone: "+1 305 555 0134",
+      phone: "305-555-0134",
       project_type: "real-estate",
       lang: "en",
       consent: 1
@@ -34,6 +34,18 @@ describe("validateLead — cuerpo bien formado", () => {
     expect(r.ok).toBe(true);
     expect(r.value.name).toBe("Ana Ruiz");
     expect(r.value.email).toBe("ana@example.com");
+  });
+
+  it("acepta nombres internacionales reales — con acentos, guion y apóstrofo", () => {
+    for (const name of ["José García", "François Müller", "O'Brien", "Ana-María", "李伟", "julian"]) {
+      expect(validateLead(body({ name })).ok).toBe(true);
+    }
+  });
+
+  it("exige exactamente 10 dígitos, sin importar el separador (guiones, espacios, sin nada)", () => {
+    for (const phone of ["3055550134", "305 555 0134", "(305) 555-0134"]) {
+      expect(validateLead(body({ phone })).ok).toBe(true);
+    }
   });
 
   it("acepta los cuatro tipos de proyecto del <select>", () => {
@@ -56,10 +68,19 @@ describe("validateLead — rechazos", () => {
     ["nombre de una sola letra", { name: "A" }, "name"],
     ["nombre vacío tras recortar", { name: "   " }, "name"],
     ["nombre no-string", { name: 123 }, "name"],
+    ["nombre con forma de URL — encontrado en producción, ver welcome email", { name: "www.pornhub.com" }, "name"],
+    ["nombre con extensión de dominio no listada explícitamente (.io)", { name: "julian.io" }, "name"],
+    ["nombre que es sólo la palabra 'www'", { name: "www" }, "name"],
+    ["nombre que es sólo la palabra 'HTTPS' (mayúsculas)", { name: "HTTPS" }, "name"],
+    ["nombre con forma de email", { name: "click@evil.com" }, "name"],
+    ["nombre con forma de fórmula de hoja de cálculo", { name: "=cmd|'/c calc'!A1" }, "name"],
+    ["nombre con tags HTML", { name: "<script>alert(1)</script>" }, "name"],
+    ["nombre que arranca con guion o apóstrofo", { name: "-Ana" }, "name"],
     ["email sin @", { email: "anaexample.com" }, "email"],
     ["email sin dominio", { email: "ana@" }, "email"],
     ["email con espacios", { email: "a b@example.com" }, "email"],
-    ["teléfono con menos de 7 dígitos", { phone: "12345" }, "phone"],
+    ["teléfono con menos de 10 dígitos", { phone: "12345" }, "phone"],
+    ["teléfono con más de 10 dígitos", { phone: "305-555-01234" }, "phone"],
     ["teléfono con letras", { phone: "555-CALL-NOW" }, "phone"],
     ["tipo de proyecto fuera del enum", { project: "drone-racing" }, "project"],
     ["tipo de proyecto vacío", { project: "" }, "project"],
