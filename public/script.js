@@ -99,7 +99,15 @@
 
     document.querySelectorAll("[data-i18n]").forEach(function (el) {
       var key = el.getAttribute("data-i18n");
-      if (dict[key] != null) el.textContent = dict[key];
+      if (dict[key] == null) return;
+      // textContent no reemplaza sólo el texto: borra TODOS los hijos. Eso se
+      // llevaba puesto el <span class="req">*</span> de los campos obligatorios
+      // en cada setLang(), incluido el primero al cargar — por eso el asterisco
+      // nunca se veía aunque el HTML y el CSS estuvieran bien. Lo guardamos y lo
+      // reponemos al final, que es donde va en los 5 casos que lo usan.
+      var req = el.querySelector(".req");
+      el.textContent = dict[key];
+      if (req) el.appendChild(req);
     });
     document.querySelectorAll("[data-i18n-ph]").forEach(function (el) {
       var key = el.getAttribute("data-i18n-ph");
