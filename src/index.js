@@ -7,6 +7,7 @@
  * falta patrones de ruta ni el binding ASSETS.
  */
 
+import { sendClientNotification } from "./client-notification.js";
 import { validateLead } from "./validate.js";
 import { verifyTurnstile } from "./turnstile.js";
 import { appendLead } from "./sheets.js";
@@ -132,6 +133,7 @@ async function handleLead(request, env, ctx) {
   const leadWithId = { ...row, id: leadId };
   ctx.waitUntil(syncToSheets(env, leadWithId));
   ctx.waitUntil(sendWelcomeEmailSafely(env, leadWithId));
+  ctx.waitUntil(sendClientNotificationSafely(env, leadWithId));
 
   return json(200, { ok: true });
 }
@@ -159,5 +161,13 @@ async function sendWelcomeEmailSafely(env, lead) {
     // llega al visitante. Queda email_sent = 0 para poder ver y reintentar
     // los envíos fallidos sin tener que rastrear logs de Workers.
     console.error(`Correo de bienvenida falló para el lead ${lead.id}: ${err.stack || err.message}`);
+  }
+}
+
+async function sendClientNotificationSafely(env, lead) {
+  try {
+    await sendClientNotification(env, lead);
+  } catch (err) {
+    console.error(`Notificación a cliente falló para el lead ${lead.id}: ${err.stack || err.message}`);
   }
 }
