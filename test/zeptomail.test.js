@@ -56,6 +56,15 @@ describe("buildWelcomeEmailBody", () => {
     expect(buildWelcomeEmailBody(lead)).toContain('src="cid:droneitor-wordmark"');
   });
 
+  it("el contacto de WhatsApp usa el icono de teléfono, sin el badge 'WA'", () => {
+    for (const lang of ["en", "es"]) {
+      const body = buildWelcomeEmailBody({ ...lead, lang });
+      expect(body).toContain("&#128222;");
+      expect(body).not.toContain(">WA<");
+      expect(body).toContain("+1 (786) 656-2397");
+    }
+  });
+
   it("escapa el nombre: no puede inyectar markup en el HTML del correo", () => {
     // validate.js ya rechaza estos nombres, pero el correo no debe depender
     // de eso para ser seguro.
@@ -80,11 +89,42 @@ describe("buildWelcomeEmailPayload", () => {
     ]);
   });
 
-  it("manda htmlbody — ya no textbody, el correo es HTML", () => {
+  it("manda htmlbody y textbody juntos — multipart, no uno u otro", () => {
     const payload = buildWelcomeEmailPayload(env, lead);
-    expect(payload.htmlbody).toBeTypeOf("string");
     expect(payload.htmlbody).toContain("<!doctype html>");
-    expect(payload.textbody).toBeUndefined();
+    expect(payload.textbody).toBeTypeOf("string");
+    expect(payload.textbody.length).toBeGreaterThan(0);
+  });
+
+  it("el textbody es texto de verdad: sin etiquetas ni entidades HTML", () => {
+    const { textbody } = buildWelcomeEmailPayload(env, { ...lead, lang: "es" });
+    expect(textbody).not.toMatch(/<[a-z][^>]*>/i);
+    expect(textbody).not.toContain("&#");
+    expect(textbody).not.toContain("&amp;");
+  });
+
+  it("las dos partes coinciden en idioma", () => {
+    const en = buildWelcomeEmailPayload(env, { ...lead, lang: "en" });
+    expect(en.textbody).not.toContain("Gracias por comunicarte");
+    expect(en.htmlbody).not.toContain("ESPAÑOL");
+
+    const es = buildWelcomeEmailPayload(env, { ...lead, lang: "es" });
+    expect(es.textbody).toContain("Gracias por comunicarte");
+    expect(es.htmlbody).toContain("ESPAÑOL");
+  });
+
+  it("las dos partes no se contradicen: mismas afirmaciones y mismos contactos", () => {
+    // Un multipart cuyas dos mitades dicen cosas distintas puntúa peor en los
+    // filtros, que es justo lo que el textbody vino a evitar. Si se cambia el
+    // copy de un lado, este test obliga a cambiar el del otro.
+    const { textbody, htmlbody } = buildWelcomeEmailPayload(env, { ...lead, lang: "es" });
+    for (const parte of [textbody, htmlbody]) {
+      expect(parte).toContain("confirmed and active immediately");
+      expect(parte).toContain("Our team will be in touch shortly");
+      expect(parte).toContain("activo de inmediato");
+      expect(parte).toContain("contact@droneitor.com");
+      expect(parte).toContain("+1 (786) 656-2397");
+    }
   });
 
   it("adjunta el wordmark como imagen inline con el cid que usa la plantilla", () => {

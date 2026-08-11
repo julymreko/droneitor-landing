@@ -24,6 +24,51 @@ const LOGO_CID = "droneitor-wordmark";
 
 const HTML_ESCAPES = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" };
 
+// Texto plano: la alternativa multipart que acompaña al htmlbody, para los
+// clientes que no renderizan HTML y para los filtros de spam. Acá no se escapa
+// nada: es texto, no markup.
+//
+// El contenido replica el de la plantilla HTML a propósito. Que las dos partes
+// de un multipart digan cosas distintas es en sí una señal que algunos filtros
+// puntúan mal, así que si se toca el copy de una hay que tocar el de la otra —
+// hay un test que compara las afirmaciones centrales de ambas.
+const enText = ({ name }) => `Hi ${name},
+
+Thanks for reaching out to Droneitor. We've received the request you
+submitted through fly.droneitor.com.
+
+Your 10% discount is confirmed and active immediately for your next
+booking with us. There is nothing else you need to claim or activate.
+
+NEXT STEP
+Our team will be in touch shortly to coordinate your project, location,
+flight details and timing.
+
+Kind regards,
+Team Droneitor
+
+contact@droneitor.com
++1 (786) 656-2397`;
+
+const esText = ({ name }) => `Hola ${name},
+
+Gracias por comunicarte con Droneitor. Recibimos la solicitud que
+enviaste a través de fly.droneitor.com.
+
+Tu descuento del 10% está confirmado y activo de inmediato para tu
+próxima reservación con nosotros. No necesitas reclamarlo ni realizar
+ningún paso adicional.
+
+SIGUIENTE PASO
+Nuestro equipo se comunicará contigo muy pronto para coordinar tu
+proyecto, ubicación, detalles del vuelo y horario.
+
+Cordialmente,
+Team Droneitor
+
+contact@droneitor.com
++1 (786) 656-2397`;
+
 /**
  * El nombre se interpola dentro de HTML, así que se escapa acá. Hoy validate.js
  * ya prohíbe `<`, `>` y `&` en el nombre, pero esto no debe depender de eso:
@@ -45,6 +90,12 @@ export function buildWelcomeEmailBody(lead) {
   return html.replaceAll("{name}", escapeHtml(lead.name));
 }
 
+/** La alternativa en texto plano del mismo correo, con la misma regla de idioma. */
+export function buildWelcomeEmailText(lead) {
+  const text = enText(lead);
+  return lead.lang === "es" ? `${text}\n\n---\n\n${esText(lead)}` : text;
+}
+
 /**
  * Arma el payload tal cual lo espera Zeptomail. Separado de sendWelcomeEmail
  * a propósito, para poder probarlo sin red — igual que leadToRow en
@@ -55,6 +106,10 @@ export function buildWelcomeEmailPayload(env, lead) {
     from: { address: env.ZEPTOMAIL_FROM_EMAIL, name: env.ZEPTOMAIL_FROM_NAME },
     to: [{ email_address: { address: lead.email, name: lead.name } }],
     subject: SUBJECT,
+    // Los dos juntos: Zeptomail los acepta a la vez y arma un multipart. El
+    // cliente que renderiza HTML muestra el HTML; el que no, y los filtros de
+    // spam, se quedan con el texto.
+    textbody: buildWelcomeEmailText(lead),
     htmlbody: buildWelcomeEmailBody(lead),
     // Nombres de campo según la API de Zeptomail: `cid` + `content`, y el
     // base64 va crudo (el mime_type viaja en su propio campo, un prefijo
