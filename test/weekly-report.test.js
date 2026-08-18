@@ -344,7 +344,9 @@ function fakeDb({ leads = [], previousCount = 0, claimSucceeds = true, existing 
 }
 
 const baseEnv = {
-  ZEPTOMAIL_API_KEY: "key",
+  // Valor distinguible a propósito: "key" a secas es subcadena de
+  // "Zoho-enczapikey" y hacía pasar por bueno cualquier encabezado.
+  ZEPTOMAIL_API_KEY: "token-agente-leads",
   REPORT_MODE: "test",
   WEEKLY_REPORT_TEST_RECIPIENTS: "Julian Cely <cj.cely@hotmail.com>",
   WEEKLY_REPORT_PRODUCTION_RECIPIENTS: "Marco Beas <droneitor1983@gmail.com>"
@@ -467,6 +469,44 @@ describe("runWeeklyReport", () => {
     expect(q.sql).toMatch(/created_at >= \? AND created_at < \?/);
   });
 
+  it("usa el token del agente del reporte, no el de los correos al lead", async () => {
+    let auth;
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (_url, init) => {
+      auth = init.headers.authorization;
+      return new Response("{}", { status: 200 });
+    });
+
+    const env = { ...baseEnv, REPORT_ZEPTOMAIL_API_KEY: "agente-1-token", DB: fakeDb({ leads: [lead()] }) };
+    await runWeeklyReport(env, { now: NOW });
+
+    // El remitente support@ vive en otro Mail Agent que no-reply@, y en
+    // Zeptomail cada agente firma con su propio token.
+    expect(auth).toBe("Zoho-enczapikey agente-1-token");
+    expect(auth).not.toContain(baseEnv.ZEPTOMAIL_API_KEY);
+  });
+
+  it("cae en la clave existente mientras no haya una propia", async () => {
+    let auth;
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (_url, init) => {
+      auth = init.headers.authorization;
+      return new Response("{}", { status: 200 });
+    });
+
+    await runWeeklyReport({ ...baseEnv, DB: fakeDb({ leads: [lead()] }) }, { now: NOW });
+    expect(auth).toBe("Zoho-enczapikey token-agente-leads");
+  });
+
+  it("sin ningún token no intenta el envío, para no confundirlo con un 401", async () => {
+    const fetchSpy = vi.spyOn(globalThis, "fetch");
+    const env = { ...baseEnv, ZEPTOMAIL_API_KEY: undefined, DB: fakeDb({ leads: [lead()] }) };
+
+    const result = await runWeeklyReport(env, { now: NOW });
+
+    expect(result.status).toBe("skipped_no_api_key");
+    expect(fetchSpy).not.toHaveBeenCalled();
+    expect(env.DB.statements.some((s) => s.sql.includes("INSERT OR IGNORE"))).toBe(false);
+  });
+
   it("no escribe el token ni direcciones en claro en el log", async () => {
     const logs = [];
     vi.spyOn(console, "log").mockImplementation((m) => logs.push(String(m)));
@@ -475,7 +515,8 @@ describe("runWeeklyReport", () => {
     await runWeeklyReport({ ...baseEnv, DB: fakeDb({ leads: [lead()] }) }, { now: NOW });
 
     const joined = logs.join("\n");
-    expect(joined).not.toMatch(/key|cj\.cely@/);
+    expect(joined).not.toContain(baseEnv.ZEPTOMAIL_API_KEY);
+    expect(joined).not.toContain("cj.cely@hotmail.com");
     expect(joined).toMatch(/cj\*+@hotmail\.com/);
   });
 });

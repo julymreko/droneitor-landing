@@ -64,5 +64,11 @@
   //   GOOGLE_SA_EMAIL
   //   GOOGLE_SA_PRIVATE_KEY
   //   GOOGLE_SHEET_ID
-  //   ZEPTOMAIL_API_KEY
+  //   ZEPTOMAIL_API_KEY            token del Mail Agent de no-reply@ (correos al lead)
+  //   REPORT_ZEPTOMAIL_API_KEY     token del Mail Agent de support@ (reporte semanal)
+  //
+  // Son dos porque en Zeptomail cada Mail Agent firma con su propio Send Mail
+  // Token y el remitente tiene que pertenecer al agente que firma. Si falta el
+  // segundo, el reporte usa el primero — y dará 401 mientras support@ siga en
+  // otro agente.
 }

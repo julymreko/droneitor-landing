@@ -184,6 +184,20 @@ export function buildReportPayload(env, report) {
 }
 
 /**
+ * El token del Mail Agent que manda el reporte.
+ *
+ * En Zeptomail cada Mail Agent tiene su propio Send Mail Token, y el remitente
+ * tiene que pertenecer al agente cuyo token firma la petición. El reporte sale
+ * de support@droneitor.com, que está en un agente distinto del que manda
+ * no-reply@ a los leads — con la clave equivocada la API responde 401.
+ *
+ * La reserva a ZEPTOMAIL_API_KEY existe para no romper nada si los dos
+ * remitentes acaban en el mismo agente; en cuanto se ponga el secreto propio,
+ * manda ese.
+ */
+const reportApiKey = (env) => env.REPORT_ZEPTOMAIL_API_KEY || env.ZEPTOMAIL_API_KEY;
+
+/**
  * Manda el reporte. Lanza si Zeptomail no acepta.
  *
  * No reintenta acá dentro: quien decide reintentar es el cron, y hacerlo en
@@ -196,7 +210,7 @@ async function sendReport(env, report) {
     headers: {
       accept: "application/json",
       "content-type": "application/json",
-      authorization: `Zoho-enczapikey ${env.ZEPTOMAIL_API_KEY}`
+      authorization: `Zoho-enczapikey ${reportApiKey(env)}`
     },
     body: JSON.stringify(buildReportPayload(env, report))
   });
@@ -252,6 +266,14 @@ export async function runWeeklyReport(env, { now = new Date(), dryRun = false } 
   if (recipients.length === 0) {
     console.error(JSON.stringify({ ...base, status: "skipped_no_recipients" }));
     return { ...base, status: "skipped_no_recipients", report };
+  }
+
+  // Sin token se comprueba ACÁ y no en el fetch: mandar sin él da un 401 que se
+  // lee como "Zeptomail rechazó el reporte" y manda a buscar el problema al
+  // remitente o al dominio, cuando lo único que falta es el secreto.
+  if (!dryRun && !reportApiKey(env)) {
+    console.error(JSON.stringify({ ...base, status: "skipped_no_api_key" }));
+    return { ...base, status: "skipped_no_api_key", report };
   }
 
   if (dryRun) {

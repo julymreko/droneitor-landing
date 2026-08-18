@@ -312,9 +312,31 @@ npm run seed:report:clean
 Borra por la marca `ts_cdata = 'seed:weekly-report'`, no por rango de fechas —
 un DELETE por fechas se llevaría por delante leads reales de esa semana.
 
+### El token de Zeptomail es otro
+
+El reporte sale de `support@droneitor.com`, que en Zeptomail pertenece a un
+**Mail Agent distinto** del que manda `no-reply@droneitor.com` a los leads.
+Cada Mail Agent firma con su propio *Send Mail Token*, y el remitente tiene que
+pertenecer al agente que firma — con el token equivocado la API responde 401
+aunque el dominio esté verificado.
+
+Por eso el reporte lee su propio secreto:
+
+```bash
+npx wrangler secret put REPORT_ZEPTOMAIL_API_KEY   # token del agente de support@
+```
+
+En local va en `.dev.vars` con el mismo nombre. Si no está definido, el reporte
+cae en `ZEPTOMAIL_API_KEY` — cómodo si algún día los dos remitentes acaban en el
+mismo agente, pero hoy eso daría 401.
+
+Sin ningún token, el reporte no intenta el envío y registra
+`status: "skipped_no_api_key"`, para que no se confunda un secreto ausente con
+un rechazo de Zeptomail.
+
 ### Envío de prueba real
 
-Requiere `ZEPTOMAIL_API_KEY` en `.dev.vars`. Con `REPORT_MODE=test` el
+Requiere `REPORT_ZEPTOMAIL_API_KEY` en `.dev.vars`. Con `REPORT_MODE=test` el
 destinatario solo puede ser Julian.
 
 ```bash
