@@ -45,7 +45,7 @@ export const HTML_HEAD = `<!doctype html>
                   WELCOME ABOARD
                 </p>
                 <h1 style="margin:0;font-family:'Playfair Display',Georgia,'Times New Roman',serif;font-size:38px;line-height:45px;font-weight:700;color:#FFFFFF;">
-                  Your 10% discount<br>is active.
+                  We've received<br>your request.
                 </h1>
               </td>
             </tr>
@@ -65,8 +65,9 @@ export const HTML_HEAD = `<!doctype html>
             <tr>
               <td colspan="2" style="padding:24px 32px 4px 32px;font-family:Poppins,Arial,Helvetica,sans-serif;font-size:15px;line-height:25px;color:#C9DCE1;">
                 <p style="margin:0 0 16px 0;color:#FFFFFF;">Hi {name},</p>
-                <p style="margin:0 0 16px 0;">Thanks for reaching out to Droneitor. We’ve received the request you submitted through fly.droneitor.com.</p>
-                <p style="margin:0 0 16px 0;"><strong style="color:#FFFFFF;">Your 10% discount is confirmed and active immediately for your next booking with us.</strong> There is nothing else you need to claim or activate.</p>
+                <p style="margin:0 0 16px 0;">Thank you for reaching out! We've successfully received your information.</p>
+                <p style="margin:0 0 16px 0;">Whether you're looking for stunning aerial visuals, dynamic social media content, or custom drone solutions here in Miami and South Florida, our team is ready to bring your vision to life.</p>
+                <p style="margin:0 0 16px 0;">We are currently reviewing your details and will get back to you within 24 to 48 hours to discuss the next steps. If you have any immediate questions or additional details to share in the meantime, feel free to reply directly to this email.</p>
               </td>
             </tr>
 
@@ -75,8 +76,8 @@ export const HTML_HEAD = `<!doctype html>
                 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%;border-collapse:collapse;background-color:#0D2028;border-left:3px solid #00BEE6;">
                   <tr>
                     <td bgcolor="#0D2028" style="padding:16px 18px;font-family:Poppins,Arial,Helvetica,sans-serif;">
-                      <p style="margin:0 0 5px 0;font-size:10px;line-height:15px;font-weight:700;letter-spacing:1.5px;color:#00BEE6;">NEXT STEP</p>
-                      <p style="margin:0;font-size:14px;line-height:22px;color:#EAF5F7;">Our team will be in touch shortly to coordinate your project, location, flight details and timing.</p>
+                      <p style="margin:0 0 5px 0;font-size:10px;line-height:15px;font-weight:700;letter-spacing:1.5px;color:#00BEE6;">WHAT'S NEXT</p>
+                      <p style="margin:0;font-size:14px;line-height:22px;color:#EAF5F7;">We'll reach out within 24-48 hours to discuss your project details and next steps.</p>
                     </td>
                   </tr>
                 </table>
@@ -85,8 +86,8 @@ export const HTML_HEAD = `<!doctype html>
 
             <tr>
               <td colspan="2" style="padding:0 32px 30px 32px;font-family:Poppins,Arial,Helvetica,sans-serif;font-size:14px;line-height:22px;color:#C9DCE1;">
-                <p style="margin:0 0 4px 0;">Kind regards,</p>
-                <p style="margin:0 0 14px 0;font-weight:700;color:#FFFFFF;">Team Droneitor</p>
+                <p style="margin:0 0 4px 0;">Talk soon,</p>
+                <p style="margin:0 0 14px 0;font-weight:700;color:#FFFFFF;">Marco Beas<br>Droneitor LLC</p>
                 <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse;">
                   <tr>
                     <td valign="middle" style="padding:0 9px 8px 0;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:20px;color:#00BEE6;">&#9993;</td>
@@ -97,7 +98,7 @@ export const HTML_HEAD = `<!doctype html>
                   <tr>
                     <td valign="middle" style="padding:0 9px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:20px;color:#FF6A2B;">&#128222;</td>
                     <td valign="middle" style="font-family:Poppins,Arial,Helvetica,sans-serif;font-size:13px;line-height:20px;">
-                      <a href="https://wa.me/17866562397?text=Hi%20Droneitor%2C%20I%20received%20my%2010%25%20discount%20through%20fly.droneitor.com.%20How%20can%20we%20get%20started%3F" target="_blank" style="color:#C9DCE1;text-decoration:underline;text-decoration-color:#FF6A2B;">+1 (786) 656-2397</a>
+                      <a href="https://wa.me/17866562397?text=Hi%20Droneitor%2C%20I%20want%20to%20discuss%20a%20project.%20How%20can%20we%20get%20started%3F" target="_blank" style="color:#C9DCE1;text-decoration:underline;text-decoration-color:#FF6A2B;">+1 (786) 656-2397</a>
                     </td>
                   </tr>
                 </table>
@@ -120,15 +121,16 @@ export const HTML_ES = `<tr>
 
             <tr>
               <td colspan="2" style="padding:30px 32px 4px 32px;">
-                <h2 style="margin:0 0 22px 0;font-family:'Playfair Display',Georgia,'Times New Roman',serif;font-size:30px;line-height:37px;font-weight:700;color:#FFFFFF;">Tu descuento del 10%<br>ya está activo.</h2>
+                <h2 style="margin:0 0 22px 0;font-family:'Playfair Display',Georgia,'Times New Roman',serif;font-size:30px;line-height:37px;font-weight:700;color:#FFFFFF;">Hemos recibido<br>tu solicitud.</h2>
               </td>
             </tr>
 
             <tr>
               <td colspan="2" style="padding:0 32px 4px 32px;font-family:Poppins,Arial,Helvetica,sans-serif;font-size:15px;line-height:25px;color:#C9DCE1;">
                 <p style="margin:0 0 16px 0;color:#FFFFFF;">Hola {name},</p>
-                <p style="margin:0 0 16px 0;">Gracias por comunicarte con Droneitor. Recibimos la solicitud que enviaste a través de fly.droneitor.com.</p>
-                <p style="margin:0 0 16px 0;"><strong style="color:#FFFFFF;">Tu descuento del 10% está confirmado y activo de inmediato para tu próxima reservación con nosotros.</strong> No necesitas reclamarlo ni realizar ningún paso adicional.</p>
+                <p style="margin:0 0 16px 0;">¡Gracias por comunicarte con nosotros! Ya recibimos tu información.</p>
+                <p style="margin:0 0 16px 0;">Ya sea que busques visuales aéreos impresionantes, contenido dinámico para redes sociales, o soluciones personalizadas con drones aquí en Miami y el Sur de Florida, nuestro equipo está listo para llevar tu visión a la realidad.</p>
+                <p style="margin:0 0 16px 0;">Estamos revisando actualmente tus detalles y nos comunicaremos contigo dentro de 24 a 48 horas para discutir los próximos pasos. Si tienes preguntas inmediatas o detalles adicionales que compartir mientras tanto, no dudes en responder este correo directamente.</p>
               </td>
             </tr>
 
@@ -138,7 +140,7 @@ export const HTML_ES = `<tr>
                   <tr>
                     <td bgcolor="#1A1715" style="padding:16px 18px;font-family:Poppins,Arial,Helvetica,sans-serif;">
                       <p style="margin:0 0 5px 0;font-size:10px;line-height:15px;font-weight:700;letter-spacing:1.5px;color:#FF8A56;">SIGUIENTE PASO</p>
-                      <p style="margin:0;font-size:14px;line-height:22px;color:#EAF5F7;">Nuestro equipo se comunicará contigo muy pronto para coordinar tu proyecto, ubicación, detalles del vuelo y horario.</p>
+                      <p style="margin:0;font-size:14px;line-height:22px;color:#EAF5F7;">Nos comunicaremos contigo dentro de 24-48 horas para discutir los detalles de tu proyecto.</p>
                     </td>
                   </tr>
                 </table>
@@ -147,8 +149,8 @@ export const HTML_ES = `<tr>
 
             <tr>
               <td colspan="2" style="padding:0 32px 34px 32px;font-family:Poppins,Arial,Helvetica,sans-serif;font-size:14px;line-height:22px;color:#C9DCE1;">
-                <p style="margin:0 0 4px 0;">Cordialmente,</p>
-                <p style="margin:0 0 14px 0;font-weight:700;color:#FFFFFF;">Team Droneitor</p>
+                <p style="margin:0 0 4px 0;">Hasta pronto,</p>
+                <p style="margin:0 0 14px 0;font-weight:700;color:#FFFFFF;">Marco Beas<br>Droneitor LLC</p>
                 <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse;">
                   <tr>
                     <td valign="middle" style="padding:0 9px 8px 0;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:20px;color:#00BEE6;">&#9993;</td>
@@ -159,7 +161,7 @@ export const HTML_ES = `<tr>
                   <tr>
                     <td valign="middle" style="padding:0 9px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:20px;color:#FF6A2B;">&#128222;</td>
                     <td valign="middle" style="font-family:Poppins,Arial,Helvetica,sans-serif;font-size:13px;line-height:20px;">
-                      <a href="https://wa.me/17866562397?text=Hola%20Droneitor%2C%20obtuve%20mi%20descuento%20del%2010%25%20a%20trav%C3%A9s%20de%20fly.droneitor.com.%20%C2%BFC%C3%B3mo%20podemos%20empezar%3F" target="_blank" style="color:#C9DCE1;text-decoration:underline;text-decoration-color:#FF6A2B;">+1 (786) 656-2397</a>
+                      <a href="https://wa.me/17866562397?text=Hola%20Droneitor%2C%20quiero%20discutir%20un%20proyecto.%20%C2%BFC%C3%B3mo%20podemos%20empezar%3F" target="_blank" style="color:#C9DCE1;text-decoration:underline;text-decoration-color:#FF6A2B;">+1 (786) 656-2397</a>
                     </td>
                   </tr>
                 </table>

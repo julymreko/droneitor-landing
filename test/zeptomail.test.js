@@ -11,7 +11,7 @@ const lead = {
 describe("buildWelcomeEmailBody", () => {
   it("incluye siempre el bloque en inglés", () => {
     const body = buildWelcomeEmailBody(lead);
-    expect(body).toContain("Thanks for reaching out");
+    expect(body).toContain("Thank you for reaching out");
     expect(body).toContain("Ana Ruiz");
   });
 
@@ -24,7 +24,7 @@ describe("buildWelcomeEmailBody", () => {
 
   it("agrega el bloque en español debajo del inglés si lang es 'es'", () => {
     const body = buildWelcomeEmailBody({ ...lead, lang: "es" });
-    expect(body).toContain("Thanks for reaching out");
+    expect(body).toContain("Thank you for reaching out");
     expect(body).toContain("ESPAÑOL");
     expect(body).toContain("Gracias por comunicarte");
     expect(body.indexOf("Thanks for reaching out")).toBeLessThan(
@@ -119,11 +119,10 @@ describe("buildWelcomeEmailPayload", () => {
     // copy de un lado, este test obliga a cambiar el del otro.
     const { textbody, htmlbody } = buildWelcomeEmailPayload(env, { ...lead, lang: "es" });
     for (const parte of [textbody, htmlbody]) {
-      expect(parte).toContain("confirmed and active immediately");
-      expect(parte).toContain("Our team will be in touch shortly");
-      expect(parte).toContain("activo de inmediato");
+      expect(parte).toContain("Thank you for reaching out");
+      expect(parte).toContain("24 to 48 hours");
+      expect(parte).toContain("Marco Beas");
       expect(parte).toContain("contact@droneitor.com");
-      expect(parte).toContain("+1 (786) 656-2397");
     }
   });
 

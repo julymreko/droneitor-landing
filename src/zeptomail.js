@@ -17,7 +17,7 @@ import { HTML_HEAD, HTML_ES, HTML_FOOT } from "./email-template.js";
 const ZEPTOMAIL_URL = "https://api.zeptomail.com/v1.1/email";
 
 // Confirmado con el cliente.
-const SUBJECT = "Your 10% Droneitor discount is ready";
+const SUBJECT = "Request received! Let's elevate your project";
 
 // Tiene que coincidir con el <img src="cid:droneitor-wordmark"> de la plantilla.
 const LOGO_CID = "droneitor-wordmark";
@@ -34,40 +34,33 @@ const HTML_ESCAPES = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" };
 // hay un test que compara las afirmaciones centrales de ambas.
 const enText = ({ name }) => `Hi ${name},
 
-Thanks for reaching out to Droneitor. We've received the request you
-submitted through fly.droneitor.com.
+Thank you for reaching out! We've successfully received your information.
 
-Your 10% discount is confirmed and active immediately for your next
-booking with us. There is nothing else you need to claim or activate.
+Whether you're looking for stunning aerial visuals, dynamic social media content, or custom drone solutions here in Miami and South Florida, our team is ready to bring your vision to life.
 
-NEXT STEP
-Our team will be in touch shortly to coordinate your project, location,
-flight details and timing.
+We are currently reviewing your details and will get back to you within 24 to 48 hours to discuss the next steps. If you have any immediate questions or additional details to share in the meantime, feel free to reply directly to this email.
 
-Kind regards,
-Team Droneitor
-
+Talk soon,
+Marco Beas
+Droneitor LLC
++1(786) 656-2397 (WhatsApp)
 contact@droneitor.com
-+1 (786) 656-2397`;
+droneitor.com`;
 
 const esText = ({ name }) => `Hola ${name},
 
-Gracias por comunicarte con Droneitor. Recibimos la solicitud que
-enviaste a través de fly.droneitor.com.
+¡Gracias por comunicarte con nosotros! Ya recibimos tu información.
 
-Tu descuento del 10% está confirmado y activo de inmediato para tu
-próxima reservación con nosotros. No necesitas reclamarlo ni realizar
-ningún paso adicional.
+Ya sea que busques visuales aéreos impresionantes, contenido dinámico para redes sociales, o soluciones personalizadas con drones aquí en Miami y el Sur de Florida, nuestro equipo está listo para llevar tu visión a la realidad.
 
-SIGUIENTE PASO
-Nuestro equipo se comunicará contigo muy pronto para coordinar tu
-proyecto, ubicación, detalles del vuelo y horario.
+Estamos revisando actualmente tus detalles y nos comunicaremos contigo dentro de 24 a 48 horas para discutir los próximos pasos. Si tienes preguntas inmediatas o detalles adicionales que compartir mientras tanto, no dudes en responder este correo directamente.
 
-Cordialmente,
-Team Droneitor
-
+Hasta pronto,
+Marco Beas
+Droneitor LLC
++1 (786) 656-2397 (WhatsApp)
 contact@droneitor.com
-+1 (786) 656-2397`;
+droneitor.com`;
 
 /**
  * El nombre se interpola dentro de HTML, así que se escapa acá. Hoy validate.js
