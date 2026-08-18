@@ -2,3 +2,11 @@ node_modules/
 .wrangler/
 .dev.vars
 .DS_Store
+
+# Originales del hero: decenas de MB y se pueden volver a pedir al cliente.
+# Lo versionado es el script que los procesa y el WebP comprimido que sale.
+assets-src/**/*.jpg
+assets-src/**/*.jpeg
+assets-src/**/*.png
+assets-src/**/*.tif
+assets-src/**/*.tiff
