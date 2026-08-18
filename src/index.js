@@ -11,6 +11,7 @@ import { sendClientNotification } from "./client-notification.js";
 import { validateLead } from "./validate.js";
 import { verifyTurnstile } from "./turnstile.js";
 import { appendLead } from "./sheets.js";
+import { runWeeklyReport } from "./weekly-report.js";
 import { sendWelcomeEmail } from "./zeptomail.js";
 
 const MAX_BODY_BYTES = 8 * 1024;
@@ -31,8 +32,39 @@ export default {
 
     // Cualquier otra cosa que llegue hasta aquí no es un asset conocido.
     return new Response("Not found", { status: 404 });
+  },
+
+  /**
+   * Cron Trigger del reporte semanal interno.
+   *
+   * El horario del cron no decide qué semana se reporta: la ventana se deriva
+   * del instante de ejecución (ver reporting-window.js). Eso es lo que permite
+   * que un cron fijo en UTC siga siendo correcto cuando Miami cambia de horario
+   * y lo que hace que un reintento a otra hora del mismo lunes reporte lo mismo.
+   *
+   * El await va dentro de waitUntil para que la invocación no se dé por
+   * terminada antes de que el envío y su registro hayan acabado.
+   */
+  async scheduled(controller, env, ctx) {
+    ctx.waitUntil(runWeeklyReportSafely(env, controller));
   }
 };
+
+async function runWeeklyReportSafely(env, controller) {
+  try {
+    await runWeeklyReport(env, {
+      now: new Date(controller.scheduledTime),
+      // Interruptor de seguridad para desarrollo: genera el reporte y lo
+      // registra en el log sin llamar a Zeptomail.
+      dryRun: String(env.REPORT_DRY_RUN ?? "").toLowerCase() === "true"
+    });
+  } catch (err) {
+    // runWeeklyReport ya liberó la reclamación del periodo, así que el próximo
+    // disparo puede reintentar. Acá solo se deja rastro y se evita que una
+    // excepción sin capturar tumbe la invocación programada.
+    console.error(`Reporte semanal falló: ${err.stack || err.message}`);
+  }
+}
 
 async function handleLead(request, env, ctx) {
   if (request.method !== "POST") {

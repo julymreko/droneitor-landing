@@ -256,9 +256,134 @@ Cobertura deliberadamente estrecha: `src/validate.js` y la firma del JWT de
 pagados sin que nadie se entere — el resto se verifica a mano contra
 `wrangler dev`. No pretende ser una suite completa que mantener.
 
+## Reporte semanal de leads (interno)
+
+Correo ejecutivo que resume los leads de la última semana completa. Va a
+Droneitor y 2DM, **no** al lead. Siempre en inglés, independientemente del
+idioma con que cada lead llenó el formulario.
+
+| Pieza | Archivo |
+| --- | --- |
+| Ventana lunes–domingo Miami → UTC | `src/reporting-window.js` |
+| Consulta, normalización y agregados | `src/weekly-report-data.js` |
+| Render HTML + texto plano | `src/weekly-report-template.js` |
+| Orquestación, destinatarios y envío | `src/weekly-report.js` |
+| Registro de entregas (idempotencia) | `migrations/0003_create_report_deliveries.sql` |
+
+Dispara con un Cron Trigger los lunes a las **06:00 UTC**. Esa hora no decide
+qué semana se reporta: la ventana se deriva del instante de ejecución, así que
+un cron fijo en UTC sigue siendo correcto cuando Miami cambia de horario, y un
+reintento a otra hora del mismo lunes reporta exactamente lo mismo.
+
+Si la semana cerró con **cero leads no se manda nada**: un correo que dice "0"
+cada lunes enseña a ignorar el reporte.
+
+### Modo test y modo producción
+
+`REPORT_MODE` en `wrangler.jsonc` es el único interruptor. Vale `test` —
+manda solo a Julian y antepone `[TEST]` al asunto — o `production`, que
+habilita también a Marco.
+
+Cualquier otro valor (un typo, la variable sin definir, un valor heredado)
+se trata como `test`. El fallo por defecto nunca puede ser escribirle al
+cliente.
+
+### Flujo de prueba local
+
+```bash
+npm run migrate:local        # crea report_deliveries
+npm run seed:report          # 15 leads en la semana del 10–16 ago 2026 + 10 la previa
+npm run report:preview -- --week 2026-08-10
+```
+
+El preview escribe `preview/weekly-report-2026-08-10.html` y `.txt` usando los
+mismos módulos que el Worker, y **no manda nada**. Ábrelo en el navegador y
+revísalo en claro y en oscuro, en ancho de escritorio y de móvil.
+
+Totales esperados con esos datos: 15 leads, semana previa 10, cambio +50%,
+viernes el día más fuerte con 4, jueves en cero.
+
+Para limpiar:
+
+```bash
+npm run seed:report:clean
+```
+
+Borra por la marca `ts_cdata = 'seed:weekly-report'`, no por rango de fechas —
+un DELETE por fechas se llevaría por delante leads reales de esa semana.
+
+### Envío de prueba real
+
+Requiere `ZEPTOMAIL_API_KEY` en `.dev.vars`. Con `REPORT_MODE=test` el
+destinatario solo puede ser Julian.
+
+```bash
+npx wrangler dev --var REPORT_DRY_RUN:true
+# en otra terminal — los Cron Triggers no se disparan solos en local:
+curl "http://127.0.0.1:8787/cdn-cgi/local/scheduled"
+```
+
+Con `REPORT_DRY_RUN:true` genera el reporte y lo registra en el log **sin**
+llamar a Zeptomail. Quítalo del comando solo cuando quieras que salga el correo
+de verdad:
+
+```bash
+npx wrangler dev
+curl "http://127.0.0.1:8787/cdn-cgi/local/scheduled"
+```
+
+El dry-run deja una línea así:
+
+```json
+{"report":"weekly-lead-report","mode":"test","period":"2026-08-10",
+ "leadCount":15,"recipientCount":1,"status":"dry_run"}
+```
+
+La fecha de la máquina decide qué semana se reporta. Para que coincida con los
+datos sembrados hay que correrlo un lunes de la semana siguiente, o sembrar la
+semana que corresponda a hoy.
+
+### Habilitar producción
+
+Un solo cambio, y a propósito:
+
+```jsonc
+"REPORT_MODE": "production"
+```
+
+Luego `npx wrangler deploy`. A partir de ahí Marco recibe el reporte. No lo
+toques hasta que el reporte esté aprobado.
+
+### Idempotencia
+
+Cada entrega se registra en `report_deliveries` con clave
+`(report_type, period_key, mode)`. El periodo se **reclama antes** de llamar a
+Zeptomail, no después: la exclusión la garantiza el índice UNIQUE de la base y
+no una comprobación en JavaScript, que dejaría una ventana entre el SELECT y el
+INSERT.
+
+Si el envío falla, la reclamación se libera y el siguiente intento puede
+tomarla. Si el Worker muere en mitad del envío, la fila queda en `pending` y
+bloquea ese periodo — es el lado seguro del fallo, pero hay que borrarla a mano
+para reintentar:
+
+```sql
+DELETE FROM report_deliveries
+ WHERE period_key = '2026-08-10' AND status = 'pending';
+```
+
+Modo test y modo producción llevan registros separados, así que probar un
+periodo no impide mandarlo de verdad después.
+
 ## Pendiente / no implementado
 
 - Los `.jpg` originales (sin usar, ~14.6&nbsp;MB) siguen en
   `public/assets/` sin referenciarse — se pueden borrar cuando quieras.
 - No hay backfill automático de las filas con `synced_to_sheets = 0`; por
   ahora se consultan a mano con el SELECT de más arriba.
+- El reporte semanal manda a todos los leads de la semana en una sola tabla.
+  El renderer está partido para poder añadir después un límite de filas y un
+  CSV adjunto sin tocar la agregación, pero no están implementados.
+- `support@droneitor.com` como remitente del reporte **no está verificado
+  todavía** contra Zeptomail. El dominio sí lo está, así que debería funcionar;
+  se confirma en el primer envío de prueba.

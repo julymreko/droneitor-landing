@@ -20,6 +20,18 @@
     }
   ],
 
+  // Reporte semanal interno de leads. El cron no fija qué semana se reporta —
+  // la ventana se deriva del instante de ejecución — así que basta con disparar
+  // holgadamente dentro del lunes de Miami.
+  //
+  // 06:00 UTC = 02:00 EDT en verano y 01:00 EST en invierno. Las dos caen
+  // después de la medianoche de Miami en cualquier época del año, que es lo que
+  // hace falta para que la semana anterior ya esté cerrada. Un `0 4 * * 1` sería
+  // exactamente medianoche en verano: carrera con el propio límite del periodo.
+  "triggers": {
+    "crons": ["0 6 * * 1"]
+  },
+
   "vars": {
     // Nombre de la pestaña de la hoja de cálculo donde se añaden los leads.
     "SHEETS_TAB": "Leads",
@@ -27,7 +39,20 @@
     // Remitente del correo de bienvenida. El dominio tiene que estar
     // verificado en la cuenta de Zeptomail o el envío falla.
     "ZEPTOMAIL_FROM_EMAIL": "no-reply@droneitor.com",
-    "ZEPTOMAIL_FROM_NAME": "Droneitor"
+    "ZEPTOMAIL_FROM_NAME": "Droneitor",
+
+    // --- Reporte semanal ---------------------------------------------------
+    // "test" manda SOLO a Julian. Cambiar a "production" es el único paso que
+    // habilita a Marco, y hay que hacerlo a propósito: resolveMode() trata
+    // cualquier otro valor (typo, var sin definir) como "test".
+    "REPORT_MODE": "test",
+
+    // Buzón contestable, distinto del no-reply de los correos al lead.
+    "REPORT_FROM_EMAIL": "support@droneitor.com",
+    "REPORT_FROM_NAME": "Droneitor Reports",
+
+    "WEEKLY_REPORT_TEST_RECIPIENTS": "Julian Cely <cj.cely@hotmail.com>",
+    "WEEKLY_REPORT_PRODUCTION_RECIPIENTS": "Marco Beas <droneitor1983@gmail.com>, Julian Cely <cj.cely@hotmail.com>"
   },
 
   "observability": {
