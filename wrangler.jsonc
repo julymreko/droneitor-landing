@@ -42,10 +42,17 @@
     "ZEPTOMAIL_FROM_NAME": "Droneitor",
 
     // --- Reporte semanal ---------------------------------------------------
-    // "test" manda SOLO a Julian. Cambiar a "production" es el único paso que
-    // habilita a Marco, y hay que hacerlo a propósito: resolveMode() trata
-    // cualquier otro valor (typo, var sin definir) como "test".
-    "REPORT_MODE": "test",
+    // "production" manda a Marco y a Julian; "test" solo a Julian. Volver a
+    // "test" es el interruptor para sacar a Marco, y sigue siendo a propósito:
+    // resolveMode() trata cualquier otro valor (typo, var sin definir) como
+    // "test", que es el lado seguro.
+    //
+    // Se activó el 2026-08-23, tras verificar el envío con datos sembrados
+    // (render en claro/oscuro y móvil, e idempotencia). La primera ejecución
+    // en producción es el lunes 24, y esa semana tiene 0 leads: dará
+    // skipped_no_leads sin enviar nada. El primer correo que reciba Marco será
+    // el del primer lunes posterior a una semana con al menos un lead.
+    "REPORT_MODE": "production",
 
     // Buzón contestable, distinto del no-reply de los correos al lead.
     "REPORT_FROM_EMAIL": "support@droneitor.com",
