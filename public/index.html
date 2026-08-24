@@ -25,16 +25,19 @@
 
 <link rel="stylesheet" href="styles.css" />
 
-<!-- Google Ads Conversion Tracking.
-     Marco da los dos valores cuando cree la conversión en Google Ads. Hasta
-     entonces se quedan con REPLACE y gtag.js NO se carga: Google sirve ese
-     script sea cual sea el ID, así que con el placeholder serían ~90 KB de JS
-     de terceros descargándose y ejecutándose en cada visita sin registrar
-     nada. Al sustituir los dos valores de abajo se activa solo.
+<!-- Google Analytics 4 + Google Ads.
+     Un solo gtag.js para los dos. Es la misma librería: se carga una vez y se
+     llama a config() una vez por propiedad. Dos <script src> no duplicarían
+     las métricas, pero sí la descarga y el arranque de ~90 KB.
 
-     Va después del preload del hero a propósito, para no competir con el LCP
-     por ancho de banda cuando esté activo. -->
+     GA4 tiene ID real y mide desde ya, así que la librería se carga siempre;
+     por eso va después del preload del hero, para no competir con el LCP.
+     Google Ads espera a los dos valores que dará Marco: mientras conserven su
+     REPLACE no se manda su config ni la conversión. Sustituirlos activa el
+     lado de Ads sin tocar nada más. -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-DQDZLZ5X3N"></script>
 <script>
+  window.GA4_MEASUREMENT_ID = "G-DQDZLZ5X3N";
   window.ADS_CONVERSION_ID = "AW-REPLACE_WITH_CONVERSION_ID";
   window.ADS_CONVERSION_LABEL = "REPLACE_WITH_CONVERSION_LABEL";
 
@@ -47,13 +50,10 @@
            window.ADS_CONVERSION_LABEL.indexOf("REPLACE") === -1;
   };
 
-  if (window.adsTrackingReady()) {
-    var gtagScript = document.createElement("script");
-    gtagScript.async = true;
-    gtagScript.src = "https://www.googletagmanager.com/gtag/js?id=" + window.ADS_CONVERSION_ID;
-    document.head.appendChild(gtagScript);
+  gtag("js", new Date());
+  gtag("config", window.GA4_MEASUREMENT_ID);
 
-    gtag("js", new Date());
+  if (window.adsTrackingReady()) {
     gtag("config", window.ADS_CONVERSION_ID);
   }
 </script>
