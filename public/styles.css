@@ -73,6 +73,9 @@ img { max-width: 100%; display: block; }
 @keyframes kb3 { from { transform: scale(1.05) translate(1.5%, -1%); } to { transform: scale(1.17) translate(-1%, 1.5%); } }
 @keyframes kb4 { from { transform: scale(1.16) translate(-1.5%, 1.5%); } to { transform: scale(1.04) translate(1%, -1%); } }
 @keyframes kb5 { from { transform: scale(1.04) translate(-1%, 1%); } to { transform: scale(1.18) translate(1.5%, -1.5%); } }
+@keyframes kb6 { from { transform: scale(1.17) translate(1%, -1.5%); } to { transform: scale(1.05) translate(-1.5%, 0); } }
+@keyframes kb7 { from { transform: scale(1.04) translate(1.5%, 1.5%); } to { transform: scale(1.16) translate(-1%, -1%); } }
+@keyframes kb8 { from { transform: scale(1.18) translate(-1.5%, -1%); } to { transform: scale(1.04) translate(1%, 1.5%); } }
 @keyframes neonShine { from { opacity: 0; left: 0%; } 50% { opacity: 1; } to { opacity: 0; left: 100%; } }
 @keyframes benGlare { from { opacity: 0; background-position: 120% 0; } 25% { opacity: 1; } to { opacity: 0; background-position: -40% 0; } }
 
@@ -146,12 +149,51 @@ img { max-width: 100%; display: block; }
 .kb3 { animation-name: kb3; }
 .kb4 { animation-name: kb4; }
 .kb5 { animation-name: kb5; }
-.kb img { width: 100%; height: 100%; object-fit: cover; }
+.kb6 { animation-name: kb6; }
+.kb7 { animation-name: kb7; }
+.kb8 { animation-name: kb8; }
+.kb img { width: 100%; height: 100%; object-fit: cover; object-position: center var(--pos-y); }
 
-.heroScrimX {
+/* Velo por foto -----------------------------------------------------------
+   Antes había un solo .heroScrimX con alpha 0.82 para las cinco. Ninguna de
+   las ocho actuales lo necesita: la fiesta nocturna aguanta 0.40 y estaba
+   siendo apagada al doble. Los valores los calcula
+   scripts/build-hero-images.mjs midiendo el percentil 90 de luminancia de la
+   zona que queda bajo el texto, y los imprime listos para pegar aquí.
+
+   El velo vive DENTRO de .heroSlide a propósito: así hereda el crossfade de
+   1800ms de su propia slide y entra y sale en sincronía con su foto. Como
+   variable en .hero daría un salto seco mientras las fotos aún se funden. */
+.slideScrim {
   position: absolute; inset: 0; pointer-events: none;
-  background: linear-gradient(to right, rgba(5, 7, 10, 0.82) 0%, rgba(5, 7, 10, 0.72) 18%, rgba(5, 7, 10, 0.34) 38%, rgba(5, 7, 10, 0) 52%);
+  background: linear-gradient(
+    to right,
+    rgba(5, 7, 10, var(--scrim-d)) 0%,
+    rgba(5, 7, 10, var(--scrim-d)) 32%,
+    rgba(5, 7, 10, calc(var(--scrim-d) * 0.5)) 44%,
+    rgba(5, 7, 10, 0) 58%
+  );
 }
+
+/* El alpha se mantiene plano hasta el 32% en vez de decaer desde el borde:
+   el copy ocupa esa columna entera y un degradado que ya cayó a la mitad en
+   su parte derecha deja el final de cada renglón sin la protección medida.
+
+   --pos-y es el object-position vertical. En escritorio la caja del hero es
+   ~2.1:1 y las fotos 4:3, así que solo se ve la banda central del 63% del
+   alto: centrar la 1 dejaba el atardecer fuera de cuadro. Los tres valores
+   de cada línea salen juntos del mismo script — el velo se mide sobre la
+   banda que --pos-y deja visible, así que cambiar uno sin el otro invalida
+   la medición. */
+.heroSlide { --scrim-d: 0.55; --scrim-m: 0.55; --pos-y: 50%; }
+.heroSlide[data-slide="0"] { --scrim-d: 0.40; --scrim-m: 0.55; --pos-y: 13%; }
+.heroSlide[data-slide="1"] { --scrim-d: 0.59; --scrim-m: 0.40; --pos-y: 50%; }
+.heroSlide[data-slide="2"] { --scrim-d: 0.51; --scrim-m: 0.60; --pos-y: 45%; }
+.heroSlide[data-slide="3"] { --scrim-d: 0.68; --scrim-m: 0.60; --pos-y: 58%; }
+.heroSlide[data-slide="4"] { --scrim-d: 0.54; --scrim-m: 0.55; --pos-y: 40%; }
+.heroSlide[data-slide="5"] { --scrim-d: 0.71; --scrim-m: 0.66; --pos-y: 50%; }
+.heroSlide[data-slide="6"] { --scrim-d: 0.62; --scrim-m: 0.73; --pos-y: 50%; }
+.heroSlide[data-slide="7"] { --scrim-d: 0.51; --scrim-m: 0.56; --pos-y: 42%; }
 .heroScrimY {
   position: absolute; inset: 0; pointer-events: none;
   background: linear-gradient(180deg, rgba(5, 7, 10, 0.45) 0%, rgba(5, 7, 10, 0.08) 26%, rgba(5, 7, 10, 0.08) 72%, rgba(5, 7, 10, 0.5) 100%);
@@ -499,13 +541,19 @@ select.inp option[value=""] { color: #8C97A3; }
   .heroWrap { padding: 136px 30px 56px 30px !important; }
   .heroGrid { gap: 46px !important; }
 
-  /* El recorte vertical de las 5 fotos puede caer en zonas más claras que
+  /* El recorte vertical de las 8 fotos puede caer en zonas más claras que
      el recorte panorámico de escritorio; el texto ya no tiene una columna
-     angosta a la izquierda que ayude al contraste, así que el scrim sube
-     de intensidad y cubre el ancho completo en vez de solo desvanecer
-     desde la izquierda. */
-  .heroScrimX {
-    background: linear-gradient(180deg, rgba(5, 7, 10, 0.86) 0%, rgba(5, 7, 10, 0.7) 45%, rgba(5, 7, 10, 0.58) 100%) !important;
+     angosta a la izquierda que ayude al contraste, así que el velo cubre el
+     ancho completo en vez de solo desvanecer desde la izquierda — y usa su
+     propia medición (--scrim-m), que en varias fotos no coincide con la de
+     escritorio: la 5 pide 0.40 en desktop y 0.49 aquí, la 7 salta a 0.71. */
+  .slideScrim {
+    background: linear-gradient(
+      180deg,
+      rgba(5, 7, 10, calc(var(--scrim-m) * 1.08)) 0%,
+      rgba(5, 7, 10, var(--scrim-m)) 50%,
+      rgba(5, 7, 10, calc(var(--scrim-m) * 0.9)) 100%
+    ) !important;
   }
   .heroScrimY {
     background: linear-gradient(180deg, rgba(5, 7, 10, 0.6) 0%, rgba(5, 7, 10, 0.3) 22%, rgba(5, 7, 10, 0.3) 68%, rgba(5, 7, 10, 0.66) 100%) !important;

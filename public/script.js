@@ -35,11 +35,14 @@
       b4t: "Precisión certificada", b4b: "Pilotos certificados y planeación milimétrica de cada vuelo. Resultados consistentes y seguros en cada servicio.",
       footerTag: "Fotografía y video aéreo profesional",
       designedBy: "Designed by",
-      heroAlt1: "Costa — toma cenital",
-      heroAlt2: "Bienes raíces — villa moderna",
-      heroAlt3: "Miami Bayside — skyline nocturno",
-      heroAlt4: "Eventos — estadio en vivo",
-      heroAlt5: "Construcción — avance de obra"
+      heroAlt1: "Bahía de Miami al atardecer — plataforma iluminada vista desde el aire",
+      heroAlt2: "Bienes raíces — casa con paneles solares en toma cenital",
+      heroAlt3: "Eventos — fiesta nocturna al aire libre vista desde el aire",
+      heroAlt4: "Construcción — vivienda en obra con cuadrilla trabajando",
+      heroAlt5: "Skyline de Miami de noche desde la bahía",
+      heroAlt6: "Construcción — torre en altura en toma cenital",
+      heroAlt7: "Eventos — activación de marca al aire libre con público",
+      heroAlt8: "Downtown Miami — edificio cubierto de grafiti desde el aire"
     },
     en: {
       title: "Droneitor — Aerial photo & video",
@@ -71,11 +74,14 @@
       b4t: "Certified precision", b4b: "Licensed pilots and millimeter flight planning. Consistent, safe results on every job.",
       footerTag: "Professional aerial photo & video",
       designedBy: "Designed by",
-      heroAlt1: "Coastline — aerial top-down shot",
-      heroAlt2: "Real estate — modern villa",
-      heroAlt3: "Miami Bayside — night skyline",
-      heroAlt4: "Events — live stadium",
-      heroAlt5: "Construction — site progress"
+      heroAlt1: "Miami bay at dusk — lit platform seen from the air",
+      heroAlt2: "Real estate — solar-panelled home, aerial top-down shot",
+      heroAlt3: "Events — open-air night party seen from the air",
+      heroAlt4: "Construction — house under construction with crew at work",
+      heroAlt5: "Miami skyline at night from the bay",
+      heroAlt6: "Construction — high-rise tower, aerial top-down shot",
+      heroAlt7: "Events — outdoor brand activation with a crowd",
+      heroAlt8: "Downtown Miami — graffiti-covered building from the air"
     }
   };
 
@@ -130,7 +136,7 @@
   document.getElementById("langES").addEventListener("click", function () { setLang("es"); });
 
   /* ============================================================
-     Hero slider — crossfade + Ken Burns, 5 fotos reales
+     Hero slider — crossfade + Ken Burns, 8 fotos reales
      ============================================================ */
   (function initSlider() {
     var slides = Array.prototype.slice.call(document.querySelectorAll(".heroSlide"));
@@ -138,38 +144,66 @@
     var current = 0;
     slides[0].classList.add("active");
 
-    // Slide 1 (LCP) loads eagerly at full priority. Slides 2-5 sit on the
-    // exact same rect (position:absolute inset:0), so native loading="lazy"
-    // alone won't actually defer their network request — the browser still
-    // sees them "in viewport". We hold their real src/srcset in data-*
-    // attributes and only swap them in after the window's load event, so
-    // they never compete with the LCP image or fonts for bandwidth.
+    // Slide 1 (LCP) loads eagerly at full priority. The rest sit on the exact
+    // same rect (position:absolute inset:0), so native loading="lazy" alone
+    // won't actually defer their network request — the browser still sees
+    // them "in viewport". We hold their real src/srcset in data-* attributes
+    // and swap them in by hand, so they never compete with the LCP image or
+    // fonts for bandwidth.
     function loadSlide(slide) {
-      var img = slide.querySelector("img[data-src]");
+      var img = slide && slide.querySelector("img[data-src]");
       if (!img) return;
       if (img.dataset.srcset) { img.srcset = img.dataset.srcset; img.removeAttribute("data-srcset"); }
       img.src = img.dataset.src;
       img.removeAttribute("data-src");
     }
 
-    function loadRemainingSlides() {
-      slides.slice(1).forEach(loadSlide);
+    // Se precargan solo las dos siguientes, no las siete restantes. A 2880w el
+    // set entero son ~5.7 MB: dispararlo junto tras "load" satura la conexión
+    // durante varios segundos justo cuando el visitante empieza a leer, y para
+    // ver la última slide hacen falta 45 s de todos modos. Dos de adelanto dan
+    // 13 s de margen, que sobra para ~1 MB en cualquier red razonable.
+    var AHEAD = 2;
+    function prefetchFrom(index) {
+      for (var i = 1; i <= AHEAD; i++) loadSlide(slides[(index + i) % slides.length]);
     }
+
+    // Con reduced-motion el carrusel no rota: se ve la slide 1 y ninguna más,
+    // así que no se descarga ninguna otra. Se comprueba antes de precargar.
+    var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduceMotion) return;
+
+    function primeSlider() { prefetchFrom(0); }
 
     if (document.readyState === "complete") {
-      loadRemainingSlides();
+      primeSlider();
     } else {
-      window.addEventListener("load", loadRemainingSlides, { once: true });
+      window.addEventListener("load", primeSlider, { once: true });
     }
 
-    var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduceMotion) return; // se queda en la primera foto, sin animación
+    // Una slide cuya foto todavía no llegó se ve NEGRA, no vacía: el hero
+    // entero queda en el color de fondo con el texto encima. Antes daba igual
+    // porque se descargaban las cuatro de golpe; con ocho fotos y precarga
+    // anticipada hay que comprobarlo. Se espera al siguiente tick en vez de
+    // saltar, pero no para siempre: una foto rota deja complete=true con
+    // naturalWidth 0 y colgaría el carrusel en la primera.
+    var holds = 0;
+    var MAX_HOLDS = 3;
+
+    function ready(slide) {
+      var img = slide.querySelector("img");
+      return img && img.complete && img.naturalWidth > 0;
+    }
 
     setInterval(function () {
+      var next = (current + 1) % slides.length;
+      loadSlide(slides[next]); // red de seguridad si "load" aún no disparó
+      if (!ready(slides[next]) && holds < MAX_HOLDS) { holds++; return; }
+      holds = 0;
       slides[current].classList.remove("active");
-      current = (current + 1) % slides.length;
-      loadSlide(slides[current]); // red de seguridad si "load" aún no disparó
+      current = next;
       slides[current].classList.add("active");
+      prefetchFrom(current);
     }, 6500);
   })();
 
