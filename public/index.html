@@ -9,7 +9,20 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Roboto:wght@300;400;500;700&family=Poppins:wght@400;500;600;700&family=Nunito+Sans:wght@400;500;800;900&display=swap" rel="stylesheet" />
+<!-- Las fuentes no bloquean el render: se piden como preload y el onload las
+     asciende a hoja de estilos ya descargadas. Se conservan las mismas
+     familias, los mismos pesos y display=swap — sin swap volverían a
+     font-display:auto, que deja el texto invisible hasta 3 s, justo el
+     problema que este cambio pretende evitar. -->
+<link
+  rel="preload"
+  as="style"
+  href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Roboto:wght@300;400;500;700&family=Poppins:wght@400;500;600;700&family=Nunito+Sans:wght@400;500;800;900&display=swap"
+  onload="this.onload=null;this.rel='stylesheet'"
+/>
+<noscript>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Roboto:wght@300;400;500;700&family=Poppins:wght@400;500;600;700&family=Nunito+Sans:wght@400;500;800;900&display=swap" />
+</noscript>
 
 <!-- LCP: preload the exact responsive variant of slide 1 that the browser
      will actually pick for this viewport (imagesrcset/imagesizes mirror
