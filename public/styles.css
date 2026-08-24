@@ -493,7 +493,10 @@ select.inp option[value=""] { color: #8C97A3; }
    ============================================================ */
 .foot { background: var(--ink-950); border-top: 1px solid rgba(255, 255, 255, 0.1); padding: 26px clamp(18px, 5vw, 48px); }
 .footRow {
-  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  /* Con dos columnas el gap separa las legales del resto, y nada más: los
+     14px de antes las dejaban pegadas al copyright mientras sobraba hueco a
+     la derecha. El reparto interno lo hace .footInfo con su propio gap. */
+  display: flex; align-items: center; justify-content: space-between; gap: clamp(20px, 4vw, 56px);
   max-width: var(--maxw); margin: 0 auto;
   font-family: var(--font-label); font-size: 0.75rem; letter-spacing: 0.06em; color: var(--text-faint);
 }
@@ -502,6 +505,15 @@ select.inp option[value=""] { color: #8C97A3; }
 .footTag { text-transform: uppercase; }
 .footBy { display: flex; align-items: center; gap: 6px; }
 .footBy a { font-weight: 500; }
+
+/* Las páginas legales van en su propia columna, a la izquierda: son enlaces
+   que salen del sitio y conviene que no se mezclen con el crédito ni con el
+   copyright. .footInfo toma el espacio restante y reparte dentro los tres
+   elementos que ya había, así que el pie sigue viéndose igual de ancho. */
+.footLegal { display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+.footLegal a { text-transform: uppercase; }
+.footSep { opacity: 0.45; }
+.footInfo { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex: 1; }
 
 /* ============================================================
    Cursor de mira (solo con puntero fino y hover real)
@@ -576,8 +588,18 @@ select.inp option[value=""] { color: #8C97A3; }
   .sectionPad { padding: 64px 18px 72px !important; }
   .benGrid { grid-template-columns: 1fr !important; }
   .benH2 { font-size: 1.75rem !important; }
-  .footRow { flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 12px !important; text-align: center !important; }
+  .footRow { flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 0 !important; text-align: center !important; }
   .footRow > * { justify-content: center !important; text-align: center !important; }
+
+  /* Apilado, las legales van primero y una línea las separa del resto. El gap
+     de .footRow se anula y el aire lo dan los paddings a ambos lados del
+     borde, para que el divisor quede centrado y no pegado a un lado. */
+  .footLegal { padding-bottom: 14px !important; }
+  .footInfo {
+    flex-direction: column !important; gap: 10px !important;
+    width: 100% !important; padding-top: 14px !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+  }
 }
 
 /* ============================================================
