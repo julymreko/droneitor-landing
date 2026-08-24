@@ -494,6 +494,20 @@
       return lead;
     }
 
+    // Conversión de Google Ads. Los valores viven en el <script> del <head> de
+    // index.html; mientras sigan con REPLACE esto no hace nada.
+    //
+    // Se dispara desde la misma rama que showSuccess() y no ante un 200 a
+    // secas: el Worker responde 200 con ok:false cuando el lead no llegó a
+    // guardarse en D1, y contar eso como conversión inflaría justo la cifra
+    // con la que Marco decide cuánto invertir en anuncios.
+    function reportAdsConversion() {
+      if (!window.gtag || !window.adsTrackingReady || !window.adsTrackingReady()) return;
+      window.gtag("event", "conversion", {
+        send_to: window.ADS_CONVERSION_ID + "/" + window.ADS_CONVERSION_LABEL
+      });
+    }
+
     function submitLead() {
       setSubmitting(true);
 
@@ -511,6 +525,7 @@
           // El éxito sólo se muestra si el Worker confirmó que el lead quedó
           // guardado en D1. Nunca por haber enviado la petición sin más.
           if (out.res.ok && out.data.ok === true) {
+            reportAdsConversion();
             showSuccess();
             return;
           }

@@ -24,6 +24,39 @@
 />
 
 <link rel="stylesheet" href="styles.css" />
+
+<!-- Google Ads Conversion Tracking.
+     Marco da los dos valores cuando cree la conversión en Google Ads. Hasta
+     entonces se quedan con REPLACE y gtag.js NO se carga: Google sirve ese
+     script sea cual sea el ID, así que con el placeholder serían ~90 KB de JS
+     de terceros descargándose y ejecutándose en cada visita sin registrar
+     nada. Al sustituir los dos valores de abajo se activa solo.
+
+     Va después del preload del hero a propósito, para no competir con el LCP
+     por ancho de banda cuando esté activo. -->
+<script>
+  window.ADS_CONVERSION_ID = "AW-REPLACE_WITH_CONVERSION_ID";
+  window.ADS_CONVERSION_LABEL = "REPLACE_WITH_CONVERSION_LABEL";
+
+  window.dataLayer = window.dataLayer || [];
+  function gtag() { dataLayer.push(arguments); }
+
+  // Lo consulta también script.js antes de mandar la conversión.
+  window.adsTrackingReady = function () {
+    return window.ADS_CONVERSION_ID.indexOf("REPLACE") === -1 &&
+           window.ADS_CONVERSION_LABEL.indexOf("REPLACE") === -1;
+  };
+
+  if (window.adsTrackingReady()) {
+    var gtagScript = document.createElement("script");
+    gtagScript.async = true;
+    gtagScript.src = "https://www.googletagmanager.com/gtag/js?id=" + window.ADS_CONVERSION_ID;
+    document.head.appendChild(gtagScript);
+
+    gtag("js", new Date());
+    gtag("config", window.ADS_CONVERSION_ID);
+  }
+</script>
 </head>
 <body>
 
